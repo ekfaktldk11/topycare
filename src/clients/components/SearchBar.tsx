@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Box, TextField, Button, Paper } from '@mui/material';
 
@@ -8,7 +8,7 @@ interface SearchBarProps {
     onSearch: (query: string) => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ placeholder = 'Search...', onSearch }) => {
+export default function SearchBar({ placeholder = 'Search...', onSearch }: SearchBarProps) {
     const [query, setQuery] = useState('');
     const [searched, setSearched] = useState(false);
 
@@ -83,16 +83,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ placeholder = 'Search...', onSear
                     </Button>
                 </form>
             </Paper>
-            
         </Box>
     );
-};
-
-export default SearchBar;
-
-/**
- * 문제는 
- * 검색어를 지웠을 때, X 표ㅕ시가 사라진다는 것.
- * X 표시는 검색어가 있을 때, searched 가 true 일 때 항상 표시되어야 한다.
- * X 표시를 클릭하면, searched 가 false 가 되어야한다.
- */
+}
