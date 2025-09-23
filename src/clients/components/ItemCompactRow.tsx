@@ -1,18 +1,30 @@
 import { ListItem, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 import type { Dish } from "../types/index";
 
 type ItemCompactRowProps = {
     dish: Dish;
-    affectIsRatio?: boolean;
 };
 
-const normalizeAffect = (n: number, ratio?: boolean) => {
-    const v = ratio ? n * 100 : n;
-    return Math.max(0, Math.min(100, isFinite(v) ? v : 0));
+const renderStars = (score: number) => {
+    const stars = [];
+    const rounded = Math.round(score * 2) / 2;
+    for (let i = 1; i <= 5; i++) {
+        if (rounded >= i) {
+            stars.push(<StarIcon key={i} fontSize="small" sx={{ color: "#FFD700" }} />);
+        } else if (rounded >= i - 0.5) {
+            stars.push(<StarIcon key={i} fontSize="small" sx={{ color: "#FFD700", opacity: 0.5 }} />);
+        } else {
+            stars.push(<StarBorderIcon key={i} fontSize="small" sx={{ color: "#FFD700" }} />);
+        }
+    }
+    return stars;
 };
 
-export default function ItemCompactRow({ dish, affectIsRatio }: ItemCompactRowProps) {
-    const value = normalizeAffect(dish.affect, affectIsRatio);
+export default function ItemCompactRow({ dish }: ItemCompactRowProps) {
+    const starScore = Math.max(0, Math.min(5, isFinite(dish.affect) ? dish.affect : 0));
+
     return (
         <ListItem disablePadding divider>
             <ListItemButton>
@@ -25,9 +37,12 @@ export default function ItemCompactRow({ dish, affectIsRatio }: ItemCompactRowPr
                             <Typography variant="body2" color="text.secondary" noWrap title={dish.brand}>
                                 {dish.brand}
                             </Typography>
-                            <Typography variant="body2" sx={{ ml: { sm: "auto" }, fontVariantNumeric: "tabular-nums" }}>
-                                영향도 {value.toFixed(0)}%
-                            </Typography>
+                            <Stack direction="row" alignItems="center" sx={{ ml: { sm: "auto" } }}>
+                                {renderStars(starScore)}
+                                <Typography variant="body2" sx={{ ml: 0.5, fontVariantNumeric: "tabular-nums" }}>
+                                    {starScore.toFixed(1)} / 5
+                                </Typography>
+                            </Stack>
                         </Stack>
                     }
                 />
