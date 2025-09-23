@@ -1,7 +1,7 @@
 import Navbar from "./clients/components/Navbar";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import mainTheme from "./clients/mainTheme";
-import Demo from "./clients/dummy/demo";
+import TimelineDish from "./clients/dummy/demo";
 
 function App() {
   return (
@@ -9,7 +9,7 @@ function App() {
       <ThemeProvider theme={mainTheme}>
         <CssBaseline />
         <Navbar />
-        <Demo />
+        <TimelineDish />
       </ThemeProvider>
     </div>
   );

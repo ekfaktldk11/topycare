@@ -3,7 +3,7 @@ import { Box } from "@mui/material";
 import ItemListView from "../components/ItemListView";
 import type { Dish } from "../types/dish";
 
-export default function Demo() {
+export default function TimelineDish() {
     const sample: Dish[] = [
         { img: "https://picsum.photos/seed/1/400/400", name: "콜드브루 커피", brand: "무명브랜드", affect: 0.3 },
         { img: "https://picsum.photos/seed/2/400/400", name: "제로 사이다", brand: "제로컴퍼니", affect: 3.5 },
