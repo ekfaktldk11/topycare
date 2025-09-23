@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import ItemListView from "../components/ItemListView";
-import { sampleDishes } from "./sampleDishes";
+import { sampleDishes } from "../dummy/sampleDishes";
 
 export default function TimelineDish() {
     return (
