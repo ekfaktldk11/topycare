@@ -13,11 +13,9 @@ export interface ItemListViewProps {
     height?: number | string;
     /** 초기 보기 모드 */
     initialView?: ViewMode;
-    /** 영향도 값을 0~1 스케일로 받는다면 true */
-    affectIsRatio?: boolean;
 }
 
-export default function ItemListView({ items, height = "70vh", initialView = "detailed", affectIsRatio = false, }: ItemListViewProps) {
+export default function ItemListView({ items, height = "70vh", initialView = "detailed" }: ItemListViewProps) {
     const [view, setView] = React.useState<ViewMode>(initialView);
     const [openImg, setOpenImg] = React.useState<string | null>(null);
 
@@ -52,14 +50,14 @@ export default function ItemListView({ items, height = "70vh", initialView = "de
                     <Grid container spacing={2}>
                         {items.map((it, idx) => (
                             <Grid key={idx} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                                <ItemCard dish={it} affectIsRatio={affectIsRatio} onZoom={setOpenImg} />
+                                <ItemCard dish={it} onZoom={setOpenImg} />
                             </Grid>
                         ))}
                     </Grid>
                 ) : (
                     <List disablePadding>
                         {items.map((it, idx) => (
-                            <ItemCompactRow key={idx} dish={it} affectIsRatio={affectIsRatio} />
+                            <ItemCompactRow key={idx} dish={it} />
                         ))}
                     </List>
                 )}

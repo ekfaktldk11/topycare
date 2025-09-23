@@ -13,7 +13,7 @@ export default function Demo() {
 
     return (
         <Box sx={{ p: 2 }}>
-            <ItemListView items={sample} height={"60vh"} initialView="detailed" affectIsRatio />
+            <ItemListView items={sample} height={"60vh"} initialView="detailed"/>
         </Box>
     );
 }
