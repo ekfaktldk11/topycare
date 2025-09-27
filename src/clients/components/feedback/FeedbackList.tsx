@@ -1,4 +1,5 @@
-import { List, ListItem, ListItemText, Typography } from "@mui/material";
+import { List, ListItem, ListItemText, Stack, Typography } from "@mui/material";
+import { renderStars } from "../../utils/renderStars";
 import type { Feedback } from "../../types";
 
 interface FeedbackListProps {
@@ -12,9 +13,12 @@ export default function FeedbackList({ feedbacks }: FeedbackListProps) {
                 <ListItem key={feedback.id} divider>
                     <ListItemText
                         primary={
-                            <Typography variant="body1" fontWeight={600}>
-                                {feedback.rating} / 5
-                            </Typography>
+                            <Stack direction="row" alignItems="center" gap={0.5}>
+                                {renderStars(feedback.rating)}
+                                <Typography variant="body1" fontWeight={600}>
+                                    {feedback.rating} / 5
+                                </Typography>
+                            </Stack>
                         }
                         secondary={feedback.content}
                     />
