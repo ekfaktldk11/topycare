@@ -1,10 +1,9 @@
 import { Box, Card, CardContent, IconButton, Stack, Typography } from "@mui/material";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
 import type { Dish, Feedback } from "../types/index";
 import FeedbackDialog from "./feedback/FeedbackDialog";
 import { useState } from "react";
+import { renderStars } from "../utils/renderStars";
 
 const dummyFeedbacks: Feedback[] = [
     { id: 1, userId: 1, productType: "dish", productId: 1, rating: 5, content: "Amazing!", createdAt: new Date(), updatedAt: new Date() },
@@ -14,21 +13,6 @@ const dummyFeedbacks: Feedback[] = [
 type ItemCardProps = {
     dish: Dish;
     onZoom: (src: string) => void;
-};
-
-const renderStars = (score: number) => {
-    const stars = [];
-    const rounded = Math.round(score * 2) / 2;
-    for (let i = 1; i <= 5; i++) {
-        if (rounded >= i) {
-            stars.push(<StarIcon key={i} fontSize="small" sx={{ color: "#FFD700" }} />);
-        } else if (rounded >= i - 0.5) {
-            stars.push(<StarIcon key={i} fontSize="small" sx={{ color: "#FFD700", opacity: 0.5 }} />);
-        } else {
-            stars.push(<StarBorderIcon key={i} fontSize="small" sx={{ color: "#FFD700" }} />);
-        }
-    }
-    return stars;
 };
 
 export default function ItemCard({ dish, onZoom }: ItemCardProps) {
