@@ -8,6 +8,15 @@ import { renderStars } from "../utils/renderStars";
 const dummyFeedbacks: Feedback[] = [
     { id: 1, userId: 1, productType: "dish", productId: 1, rating: 5, content: "Amazing!", createdAt: new Date(), updatedAt: new Date() },
     { id: 2, userId: 2, productType: "dish", productId: 1, rating: 4, content: "Pretty good.", createdAt: new Date(), updatedAt: new Date() },
+    // Add more dummy feedbacks as needed
+    { id: 3, userId: 3, productType: "dish", productId: 1, rating: 3, content: "It's okay.", createdAt: new Date(), updatedAt: new Date() },
+    { id: 4, userId: 4, productType: "dish", productId: 1, rating: 2, content: "Not great.", createdAt: new Date(), updatedAt: new Date() },
+    { id: 5, userId: 5, productType: "dish", productId: 1, rating: 1, content: "Terrible experience.", createdAt: new Date(), updatedAt: new Date() },
+    { id: 6, userId: 6, productType: "dish", productId: 1, rating: 4, content: "I liked it.", createdAt: new Date(), updatedAt: new Date() },
+    { id: 7, userId: 7, productType: "dish", productId: 1, rating: 5, content: "Best dish ever!", createdAt: new Date(), updatedAt: new Date() },
+    { id: 8, userId: 8, productType: "dish", productId: 1, rating: 3, content: "Average taste.", createdAt: new Date(), updatedAt: new Date() },
+    { id: 9, userId: 9, productType: "dish", productId: 1, rating: 2, content: "Could be better.", createdAt: new Date(), updatedAt: new Date() },
+    { id: 10, userId: 10, productType: "dish", productId: 1, rating: 1, content: "Would not recommend.", createdAt: new Date(), updatedAt: new Date() },
 ];
 
 type ItemCardProps = {
