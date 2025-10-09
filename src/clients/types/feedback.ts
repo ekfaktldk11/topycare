@@ -7,10 +7,9 @@
  */
 
 export interface Feedback {
-    itemId: string; // 평가 ID
+    itemId: string; // 평가 대상 상품 ID
     userId: string; // 평가를 남긴 유저 ID
-    productType: 'dish'; // | 'drink' | 'snack'; // 평가 대상 상품 유형
-    productId: number; // 평가 대상 상품 ID
+    itemType: 'dish'; // | 'drink' | 'snack'; // 평가 대상 상품 유형
     rating: number; // 평점 (예: 1-5)
     content: string; // 평가 내용
     createdAt: Date; // 평가 작성일
