@@ -12,7 +12,7 @@ function App() {
                 <Navbar />
                 <Routes>
                     <Route path="/" element={<TimelineDish />} />
-                    <Route path="/dishes" element={<TimelineDish />} />
+                    <Route path="/dish" element={<TimelineDish />} />
                     {/* 다른 페이지 Route 추가 가능 */}
                 </Routes>
             </Router>

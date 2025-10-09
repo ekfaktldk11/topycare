@@ -22,7 +22,7 @@ const backend = defineBackend({
 const apiStack = backend.createStack("api-stack");
 
 // create a new REST API
-const dishServiceApi = new RestApi(apiStack, "RestApi", { // 얘는 리네이밍할 필요가 있을 수 있음. dishes path 에 만 사용되는게 아니니까, 여러 path 이 하나의 api 에 정의할 거라, 범용성 좋은 걸로
+const dishServiceApi = new RestApi(apiStack, "RestApi", { // 얘는 리네이밍할 필요가 있을 수 있음. dish path 에 만 사용되는게 아니니까, 여러 path 이 하나의 api 에 정의할 거라, 범용성 좋은 걸로
 	restApiName: "dishService",
 	deploy: true,
 	deployOptions: {
@@ -41,7 +41,7 @@ const lambdaIntegration = new LambdaIntegration(
 );
 
 // create a new resource path
-const dishesPath = dishServiceApi.root.addResource("dishes");
+const dishesPath = dishServiceApi.root.addResource("dish");
 
 // add methods you would like to create to the resource path
 dishesPath.addMethod("GET", lambdaIntegration);
@@ -73,8 +73,8 @@ const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
 		new PolicyStatement({
 			actions: ["execute-api:Invoke"],
 			resources: [
-				`${dishServiceApi.arnForExecuteApi("*", "/dishes", "dev")}`,
-				`${dishServiceApi.arnForExecuteApi("*", "/dishes/*", "dev")}`,
+				`${dishServiceApi.arnForExecuteApi("*", "/dish", "dev")}`,
+				`${dishServiceApi.arnForExecuteApi("*", "/dish/*", "dev")}`,
 			],
 		}),
 	],
