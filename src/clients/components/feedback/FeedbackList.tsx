@@ -10,7 +10,7 @@ export default function FeedbackList({ feedbacks }: FeedbackListProps) {
     return (
         <List disablePadding>
             {feedbacks.map((feedback) => (
-                <ListItem key={feedback.id} divider>
+                <ListItem key={feedback.itemId} divider>
                     <ListItemText
                         primary={
                             <Stack direction="row" alignItems="center" gap={0.5}>

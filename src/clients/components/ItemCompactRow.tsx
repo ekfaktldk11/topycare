@@ -1,5 +1,5 @@
 import { ListItem, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
-import type { Dish, Feedback } from "../types/index";
+import type { Dish } from "../types/index";
 import FeedbackDialog from "./feedback/FeedbackDialog";
 import { useState } from "react";
 import { renderStars } from "../utils/renderStars";
