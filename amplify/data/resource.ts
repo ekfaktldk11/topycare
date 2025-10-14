@@ -5,14 +5,14 @@ import type { ClientSchema } from "@aws-amplify/backend";
 const schema = a.schema({
 	Dish: a
 		.model({
-			id: a.id(),
+			id: a.id().required(),
 			img: a.string(),
 			name: a.string(),
 			brand: a.string(),
 			affect: a.float(),
 		})
 		.identifier(['id'])
-		.authorization((allow) => [allow.guest(), allow.authenticated()]),
+		.authorization((allow) => [allow.guest(), allow.publicApiKey()]),
 
 	Feedback: a
 		.model({
@@ -25,7 +25,7 @@ const schema = a.schema({
 			updatedAt: a.datetime(),
 		})
 		.identifier(['itemId', 'userId', 'itemType'])
-		.authorization((allow) => [allow.guest(), allow.authenticated()]),
+		.authorization((allow) => [allow.guest(), allow.publicApiKey()]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
@@ -33,6 +33,6 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
 	schema,
 	authorizationModes: {
-		defaultAuthorizationMode: 'identityPool',
+		defaultAuthorizationMode: 'apiKey',
 	},
 });
