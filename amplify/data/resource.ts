@@ -34,6 +34,5 @@ export const data = defineData({
 	schema,
 	authorizationModes: {
 		defaultAuthorizationMode: 'identityPool',
-		//defaultAuthorizationMode: "lambda", // Only triggered by the serverless function 근데 이거 오류발생;
 	},
 });
