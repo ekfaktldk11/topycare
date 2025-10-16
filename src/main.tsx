@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { parseAmplifyConfig } from 'aws-amplify/utils';
 import App from './App.tsx';
 import outputs from '../amplify_outputs.json';
+import { fetchDishes } from './clients/api/data.ts';
 
 const amplifyConfig = parseAmplifyConfig(outputs);
 
@@ -18,3 +19,13 @@ createRoot(document.getElementById('root')!).render(
         <App />
     </StrictMode>,
 )
+
+window.onload = async () => {
+    try {
+        const result = await fetchDishes();
+        const { dish, errors } = result;
+        console.log("Fetched dish on load:", dish, errors);
+    } catch (error) {
+        console.error("Error fetching dishes on load:", error);
+    }
+}
