@@ -29,3 +29,6 @@ package-lock.json
 .amplify
 amplify_outputs*
 amplifyconfiguration*
+
+# vite-env.d.ts
+src/vite-env.d.ts
