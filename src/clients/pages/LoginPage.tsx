@@ -1,5 +1,4 @@
-// ...existing code...
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { JSX } from "react";
 import {
     Container,
@@ -11,15 +10,9 @@ import {
     CircularProgress,
     Link,
 } from "@mui/material";
-import {
-    signIn,
-    signOut,
-    getCurrentUser,
-    signUp,
-    confirmSignUp,
-} from "aws-amplify/auth";
-
-type CognitoUserLike = any;
+import { signIn, signOut, signUp, confirmSignUp } from "aws-amplify/auth";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 // ...existing code...
 export default function LoginPage(): JSX.Element {
@@ -27,13 +20,20 @@ export default function LoginPage(): JSX.Element {
     const [password, setPassword] = useState<string>("");
     const [confirmPassword, setConfirmPassword] = useState<string>("");
     const [name, setName] = useState<string>("");
-    const [user, setUser] = useState<CognitoUserLike | null>(null);
+    const { user, isLoading: isAuthLoading } = useAuth();
     const [error, setError] = useState<string>("");
     const [info, setInfo] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [isSignUp, setIsSignUp] = useState<boolean>(false);
     const [showConfirmStep, setShowConfirmStep] = useState<boolean>(false);
     const [confirmCode, setConfirmCode] = useState<string>("");
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) {
+            navigate("/"); // 로그인된 사용자는 홈으로 리디렉션
+        }
+    }, [user, navigate]);
 
     const handleSignIn = async () => {
         setError("");
@@ -41,8 +41,7 @@ export default function LoginPage(): JSX.Element {
         setLoading(true);
         try {
             await signIn({ username: email, password });
-            const current = await getCurrentUser();
-            setUser(current);
+            // AuthProvider의 Hub listener가 상태를 업데이트하고 리디렉션합니다.
         } catch (err: any) {
             setError(err?.message ?? "Sign in failed");
         } finally {
@@ -54,7 +53,6 @@ export default function LoginPage(): JSX.Element {
         try {
             setLoading(true);
             await signOut();
-            setUser(null);
         } catch (err: any) {
             setError(err?.message ?? "Sign out failed");
         } finally {
@@ -110,13 +108,21 @@ export default function LoginPage(): JSX.Element {
         }
     };
 
+    if (isAuthLoading) {
+        return (
+            <Container maxWidth="xs" sx={{ mt: 8, textAlign: "center" }}>
+                <CircularProgress />
+            </Container>
+        );
+    }
+
     if (user) {
+        // 이 부분은 useEffect 리디렉션으로 인해 거의 보이지 않지만, 만약을 위해 남겨둡니다.
         return (
             <Container maxWidth="xs" sx={{ mt: 8 }}>
                 <Box textAlign="center">
                     <Typography variant="h6" gutterBottom>
-                        Welcome,{" "}
-                        {user.username ?? user?.attributes?.email ?? "User"}
+                        Welcome, {user.username ?? "User"}
                     </Typography>
                     <Button
                         variant="contained"
