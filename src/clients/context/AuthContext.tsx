@@ -7,25 +7,38 @@ import type { AuthUser } from "aws-amplify/auth";
 type AuthContextType = {
     user: AuthUser | null;
     isLoading: boolean;
+    isAdmin: boolean; // isAdmin 상태 추가
 };
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
     isLoading: true,
+    isAdmin: false, // 기본값은 false
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isAdmin, setIsAdmin] = useState(false); // isAdmin 상태 관리
 
     const checkUser = async () => {
         setIsLoading(true);
         try {
             const currentUser = await getCurrentUser();
-            await fetchAuthSession(); // 세션 갱신
+            const session = await fetchAuthSession();
+            const groups = session.tokens?.idToken?.payload[
+                "cognito:groups"
+            ] as string[] | undefined;
+
+            if (groups?.includes("Admins")) {
+                setIsAdmin(true);
+            } else {
+                setIsAdmin(false);
+            }
             setUser(currentUser);
         } catch (error) {
             setUser(null);
+            setIsAdmin(false);
         } finally {
             setIsLoading(false);
         }
@@ -41,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     break;
                 case "signedOut":
                     setUser(null);
+                    setIsAdmin(false); // 로그아웃 시 isAdmin도 false로 설정
                     break;
             }
         });
@@ -51,7 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, isLoading }}>
+        <AuthContext.Provider value={{ user, isLoading, isAdmin }}>
             {children}
         </AuthContext.Provider>
     );

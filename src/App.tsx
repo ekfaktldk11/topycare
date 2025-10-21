@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./clients/pages/LoginPage";
 import { AuthProvider } from "./clients/context/AuthContext"; // AuthProvider 임포트
 import { ProtectedRoute } from "./clients/components/ProtectedRoute"; // ProtectedRoute 임포트
+import { AdminRoute } from "./clients/components/AdminRoute"; // AdminRoute 임포트
 
 function App() {
     return (
@@ -32,7 +33,15 @@ function App() {
                             }
                         />
 
-                        {/* 다른 페이지 Route 추가 가능 */}
+                        {/* 관리자 전용 경로 */}
+                        <Route
+                            path="/admin"
+                            element={
+                                <AdminRoute>
+                                    <div>임시</div>
+                                </AdminRoute>
+                            }
+                        />
                     </Routes>
                 </Router>
             </AuthProvider>
