@@ -12,6 +12,7 @@ import {
 	IconButton,
 } from "@mui/material";
 import { Edit as EditIcon, Save as SaveIcon } from "@mui/icons-material";
+import { signOut } from "aws-amplify/auth";
 
 export default function ProfilePage() {
 	const [isEditing, setIsEditing] = useState(false);
@@ -120,12 +121,15 @@ export default function ProfilePage() {
 					<Button variant="outlined" color="primary" fullWidth>
 						비밀번호 변경
 					</Button>
-					<Button variant="outlined" color="secondary" fullWidth>
-						알림 설정
+					<Button variant="outlined" color="secondary" fullWidth onClick={() => signOut()}>
+						로그 아웃
 					</Button>
 					<Button variant="outlined" color="error" fullWidth>
 						계정 삭제
 					</Button>
+					{/*<Button variant="outlined" color="secondary" fullWidth>
+						알림 설정
+					</Button>*/}
 				</Box>
 			</Paper>
 		</Container>
