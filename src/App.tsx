@@ -7,6 +7,7 @@ import LoginPage from "./clients/pages/LoginPage";
 import { AuthProvider } from "./clients/context/AuthContext"; // AuthProvider 임포트
 import { ProtectedRoute } from "./clients/components/ProtectedRoute"; // ProtectedRoute 임포트
 import { AdminRoute } from "./clients/components/AdminRoute"; // AdminRoute 임포트
+import ProfilePage from "./clients/pages/ProfilePage";
 
 function App() {
     return (
@@ -25,10 +26,10 @@ function App() {
 
                         {/* 보호된 경로 */}
                         <Route
-                            path=""
+                            path="/profile"
                             element={
                                 <ProtectedRoute>
-                                    <div>임시</div>
+                                    <ProfilePage />
                                 </ProtectedRoute>
                             }
                         />

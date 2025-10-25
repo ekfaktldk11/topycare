@@ -104,7 +104,8 @@
 //     );
 // }
 
-import { Container, Link, Box } from "@mui/material";
+import { Container, Link, Box, IconButton } from "@mui/material";
+import { AccountCircle } from "@mui/icons-material";
 
 export default function Navbar() {
     return (
@@ -113,7 +114,6 @@ export default function Navbar() {
             sx={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center", // 가운데 정렬
                 position: "sticky",
                 top: 0,
                 width: "100%",
@@ -133,6 +133,11 @@ export default function Navbar() {
                 >
                     topycare
                 </Link>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", marginLeft: "auto" }}>
+                <IconButton href="/profile" color="inherit">
+                    <AccountCircle />
+                </IconButton>
             </Box>
         </Container>
     );
