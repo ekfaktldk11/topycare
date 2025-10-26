@@ -19,8 +19,7 @@ export default function ProfilePage() {
 	const [userInfo, setUserInfo] = useState({
 		name: "김토피",
 		email: "topy@example.com",
-		phone: "010-1234-5678",
-		bio: "건강한 식습관을 추구하는 사용자입니다.",
+		//bio: "건강한 식습관을 추구하는 사용자입니다.",
 	});
 
 	const handleEdit = () => {
@@ -87,17 +86,7 @@ export default function ProfilePage() {
 							variant="outlined"
 						/>
 					</Grid>
-					<Grid size={{ xs: 12, sm: 6 }}>
-						<TextField
-							fullWidth
-							label="전화번호"
-							value={userInfo.phone}
-							onChange={handleChange("phone")}
-							disabled={!isEditing}
-							variant="outlined"
-						/>
-					</Grid>
-					<Grid size={{ xs: 12 }}>
+					{/*<Grid size={{ xs: 12 }}>
 						<TextField
 							fullWidth
 							label="소개"
@@ -108,7 +97,17 @@ export default function ProfilePage() {
 							multiline
 							rows={3}
 						/>
-					</Grid>
+					</Grid>*/}
+				</Grid>
+
+				<Divider sx={{ my: 3 }} />
+
+				{/* User Activity Section */}
+				<Typography variant="h6" gutterBottom>
+					활동
+				</Typography>
+				<Grid container spacing={2}>
+					<div>🚧</div>
 				</Grid>
 
 				<Divider sx={{ my: 3 }} />
