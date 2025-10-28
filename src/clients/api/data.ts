@@ -7,6 +7,6 @@ const client = generateClient<Schema>();
 // Data client
 export const fetchDishes = async () => {
     const { data: dish, errors } = await client.models.Dish.list();
-    console.log("Fetched dish:", dish, errors);
+    //console.log("Fetched dish:", dish, errors);
 	return { dish, errors };
 };

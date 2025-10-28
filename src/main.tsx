@@ -20,12 +20,12 @@ createRoot(document.getElementById('root')!).render(
     </StrictMode>,
 )
 
-window.onload = async () => {
-    try {
-        const result = await fetchDishes();
-        const { dish, errors } = result;
-        console.log("Fetched dish on load:", dish, errors);
-    } catch (error) {
-        console.error("Error fetching dishes on load:", error);
-    }
-}
+//window.onload = async () => {
+//    try {
+//        const result = await fetchDishes();
+//        const { dish, errors } = result;
+//        console.log("Fetched dish on load:", dish, errors);
+//    } catch (error) {
+//        console.error("Error fetching dishes on load:", error);
+//    }
+//}
