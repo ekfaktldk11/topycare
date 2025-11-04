@@ -7,9 +7,8 @@ const schema = a.schema({
 		.model({
 			id: a.id().required(),
 			img: a.string(),
-			name: a.string(),
+			name: a.string().required(),
 			brand: a.string(),
-			affect: a.float(),
 		})
 		.identifier(['id'])
 		.authorization((allow) => [allow.guest(), allow.publicApiKey()]),
@@ -19,10 +18,10 @@ const schema = a.schema({
 			itemId: a.string().required(),
 			userId: a.string().required(),
 			itemType: a.string().required(),
-			rating: a.integer(),
+			rating: a.integer().required(),
 			content: a.string(),
-			createdAt: a.datetime(),
-			updatedAt: a.datetime(),
+			createdAt: a.datetime().required(),
+			updatedAt: a.datetime().required(),
 		})
 		.identifier(['itemId', 'userId', 'itemType'])
 		.authorization((allow) => [allow.guest(), allow.publicApiKey()]),
