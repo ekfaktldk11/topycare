@@ -6,11 +6,12 @@ import { renderStars } from "../utils/renderStars";
 
 type ItemCompactRowProps = {
     dish: Dish;
+    rating?: number;
 };
 
-export default function ItemCompactRow({ dish }: ItemCompactRowProps) {
+export default function ItemCompactRow({ dish, rating = 0 }: ItemCompactRowProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
-    const starScore = Math.max(0, Math.min(5, isFinite(dish.affect) ? dish.affect : 0));
+    const starScore = Math.max(0, Math.min(5, isFinite(rating) ? rating : 0));
 
     return (
         <>

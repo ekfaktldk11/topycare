@@ -8,11 +8,12 @@ import { renderStars } from "../utils/renderStars";
 type ItemCardProps = {
     dish: Dish;
     onZoom: (src: string) => void;
+    rating?: number;
 };
 
-export default function ItemCard({ dish, onZoom }: ItemCardProps) {
+export default function ItemCard({ dish, onZoom, rating = 0 }: ItemCardProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
-    const starScore = Math.max(0, Math.min(5, isFinite(dish.affect) ? dish.affect : 0));
+    const starScore = Math.max(0, Math.min(5, isFinite(rating) ? rating : 0));
 
     return (
         <>
@@ -36,7 +37,10 @@ export default function ItemCard({ dish, onZoom }: ItemCardProps) {
                         >
                             <IconButton
                                 aria-label="이미지 확대"
-                                onClick={() => onZoom(dish.img)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onZoom(dish.img);
+                                }}
                                 sx={{ position: "absolute", right: 4, top: 4, bgcolor: "rgba(0,0,0,0.45)", color: "common.white", "&:hover": { bgcolor: "rgba(0,0,0,0.6)" } }}
                                 size="small"
                             >
