@@ -4,6 +4,8 @@ import type { Dish } from "../types/index";
 import FeedbackDialog from "./feedback/FeedbackDialog";
 import { useState } from "react";
 import { renderStars } from "../utils/renderStars";
+import { createFeedback } from "../api/data";
+import { getCurrentUser } from "aws-amplify/auth";
 
 type ItemCardProps = {
     dish: Dish;
@@ -14,6 +16,31 @@ type ItemCardProps = {
 export default function ItemCard({ dish, onZoom, rating = 0 }: ItemCardProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
     const starScore = Math.max(0, Math.min(5, isFinite(rating) ? rating : 0));
+
+    const handleSubmitFeedback = async (feedback: { rating: number; content?: string }) => {
+        try {
+            const user = await getCurrentUser();
+            const result = await createFeedback(
+                dish.id,
+                user.userId,
+                "dish",
+                feedback.rating,
+                feedback.content
+            );
+
+            if (result.newFeedback) {
+                console.log("Feedback created successfully:", result.newFeedback);
+                setDialogOpen(false);
+                // TODO: 성공 메시지 표시, 리스트 새로고침
+            } else {
+                console.error("Failed to create feedback:", result.errors);
+                // TODO: 에러 메시지 표시
+            }
+        } catch (error) {
+            console.error("Error submitting feedback:", error);
+            // TODO: 에러 메시지 표시 (로그인 필요 등)
+        }
+    };
 
     return (
         <>
@@ -90,7 +117,7 @@ export default function ItemCard({ dish, onZoom, rating = 0 }: ItemCardProps) {
                 dish={dish}
                 feedbacks={[]}
                 onClose={() => setDialogOpen(false)}
-                onSubmitFeedback={(feedback) => console.log("New feedback:", feedback)}
+                onSubmitFeedback={handleSubmitFeedback}
             />
         </>
     );

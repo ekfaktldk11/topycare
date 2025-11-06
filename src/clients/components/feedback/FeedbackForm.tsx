@@ -1,17 +1,19 @@
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button, Rating, Stack, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 
 interface FeedbackFormProps {
-    onSubmit: (feedback: string) => void;
+    onSubmit: (feedback: { rating: number; content?: string }) => void;
 }
 
 export default function FeedbackForm({ onSubmit }: FeedbackFormProps) {
     const [feedback, setFeedback] = useState("");
+    const [rating, setRating] = useState<number>(0);
 
     const handleSubmit = () => {
-        if (feedback.trim()) {
-            onSubmit(feedback);
+        if (rating > 0) {
+            onSubmit({ rating, content: feedback.trim() || undefined });
             setFeedback("");
+            setRating(0);
         }
     };
 
@@ -26,19 +28,43 @@ export default function FeedbackForm({ onSubmit }: FeedbackFormProps) {
                 backgroundColor: "background.paper",
             }}
         >
-            <TextField
-                fullWidth
-                multiline
-                rows={2}
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-                placeholder="Leave your feedback..."
-                variant="outlined"
-                sx={{ mb: 1 }}
-            />
-            <Button fullWidth variant="contained" color="primary" onClick={handleSubmit}>
-                Submit
-            </Button>
+            <Stack gap={2}>
+                {/* 별점 선택 */}
+                <Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        영향도 평가 *
+                    </Typography>
+                    <Rating
+                        name="rating"
+                        value={rating}
+                        onChange={(_, newValue) => setRating(newValue || 0)}
+                        size="large"
+                        precision={1}
+                    />
+                </Box>
+
+                {/* 피드백 텍스트 */}
+                <TextField
+                    fullWidth
+                    multiline
+                    rows={2}
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                    placeholder="추가 의견을 남겨주세요... (선택사항)"
+                    variant="outlined"
+                />
+
+                {/* 제출 버튼 */}
+                <Button 
+                    fullWidth 
+                    variant="contained" 
+                    color="primary" 
+                    onClick={handleSubmit}
+                    disabled={rating === 0}
+                >
+                    제출
+                </Button>
+            </Stack>
         </Box>
     );
 }

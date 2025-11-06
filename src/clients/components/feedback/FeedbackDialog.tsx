@@ -10,7 +10,7 @@ interface FeedbackDialogProps {
     dish: Dish;
     feedbacks: Feedback[];
     onClose: () => void;
-    onSubmitFeedback: (feedback: string) => void;
+    onSubmitFeedback: (feedback: { rating: number; content?: string }) => void;
 }
 
 export default function FeedbackDialog({
