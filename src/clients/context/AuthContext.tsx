@@ -26,11 +26,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const currentUser = await getCurrentUser();
             const session = await fetchAuthSession();
-            const groups = session.tokens?.idToken?.payload[
+            const groupsFromId = session.tokens?.idToken?.payload[
                 "cognito:groups"
             ] as string[] | undefined;
+            const groupsFromAccess = session.tokens?.accessToken?.payload[
+                "cognito:groups"
+            ] as string[] | undefined;
+            const groups = groupsFromId ?? groupsFromAccess;
 
-            if (groups?.includes("Admins")) {
+            if (groups?.includes("ADMIN")) {
                 setIsAdmin(true);
             } else {
                 setIsAdmin(false);
