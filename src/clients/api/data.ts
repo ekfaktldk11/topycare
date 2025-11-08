@@ -3,8 +3,40 @@ import type { Schema } from "../../../amplify/data/resource";
 
 const client = generateClient<Schema>();
 
-// Now you should be able to make CRUDL operations with the
-// Data client
+export type DishCreateResult = {
+    newDish: Schema["Dish"]["type"] | null;
+    errors: any[] | undefined;
+};
+
+/**
+ * 새로운 Dish를 생성합니다.
+ */
+export const createDish = async (
+    img: string,
+    name: string,
+    brand: string
+): Promise<DishCreateResult> => {
+    try {
+        const { data: newDish, errors } = await client.models.Dish.create({
+            img: img,
+            name: name,
+            brand: brand,
+        });
+
+        if (errors) {
+            console.error("Error creating dish:", errors);
+        }
+
+        return { newDish, errors };
+    } catch (error) {
+        console.error(
+            "An unexpected error occurred while creating dish:",
+            error
+        );
+        return { newDish: null, errors: [error as any] };
+    }
+};
+
 export const fetchDishes = async () => {
     const { data: dish, errors } = await client.models.Dish.list();
     //console.log("Fetched dish:", dish, errors);

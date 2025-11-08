@@ -4,18 +4,17 @@ import Navbar from "./clients/components/Navbar";
 import TimelineDish from "./clients/pages/TimeLineDish";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./clients/pages/LoginPage";
-import { AuthProvider } from "./clients/context/AuthContext"; // AuthProvider 임포트
-import { ProtectedRoute } from "./clients/components/ProtectedRoute"; // ProtectedRoute 임포트
-import { AdminRoute } from "./clients/components/AdminRoute"; // AdminRoute 임포트
+import { AuthProvider } from "./clients/context/AuthContext";
+import { ProtectedRoute } from "./clients/components/ProtectedRoute";
+import { AdminRoute } from "./clients/components/AdminRoute";
 import ProfilePage from "./clients/pages/ProfilePage";
+import AdminPage from "./clients/pages/AdminPage";
 
 function App() {
     return (
         <ThemeProvider theme={mainTheme}>
             <CssBaseline />
             <AuthProvider>
-                {" "}
-                {/* AuthProvider로 전체 앱을 감쌉니다. */}
                 <Router>
                     <Navbar />
                     <Routes>
@@ -39,7 +38,7 @@ function App() {
                             path="/admin"
                             element={
                                 <AdminRoute>
-                                    <div>임시</div>
+                                    <AdminPage />
                                 </AdminRoute>
                             }
                         />
