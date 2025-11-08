@@ -19,7 +19,6 @@ export type FeedbackCreateResult = {
  * 새로운 피드백을 생성합니다.
  */
 export const createFeedback = async (
-    itemId: string,
     userId: string,
     itemType: string,
     rating: number,
@@ -28,7 +27,6 @@ export const createFeedback = async (
     try {
         const { data: newFeedback, errors } =
             await client.models.Feedback.create({
-                itemId: itemId,
                 userId: userId,
                 itemType: itemType,
                 rating: rating,
@@ -56,16 +54,16 @@ export type AverageRatingResult = {
     errors: any[] | null;
 };
 /**
- * 특정 itemId와 itemType에 대한 rating 평균을 계산합니다.
+ * 특정 id와 itemType에 대한 rating 평균을 계산합니다.
  */
 export const getAverageRating = async (
-    itemId: string,
+    id: string,
     itemType: string
 ): Promise<AverageRatingResult> => {
     try {
         const { data: feedbacks, errors } = await client.models.Feedback.list({
             filter: {
-                itemId: { eq: itemId },
+                id: { eq: id },
                 itemType: { eq: itemType },
             },
         });
@@ -105,7 +103,7 @@ export type SortOption =
 
 export type BatchAverageRatingResult = {
     ratings: Map<string, number>;
-    sortedItems: Array<{ itemId: string; rating: number }>;
+    sortedItems: Array<{ id: string; rating: number }>;
     errors: any[] | null;
 };
 
@@ -133,21 +131,21 @@ export const getBatchAverageRatings = async (
             allErrors.push(...errors);
         }
 
-        // itemId별로 rating 평균 계산
+        // id별로 rating 평균 계산
         if (feedbacks && feedbacks.length > 0) {
             const itemGroups = new Map<string, number[]>();
 
             feedbacks.forEach((feedback) => {
-                const ratings = itemGroups.get(feedback.itemId) || [];
+                const ratings = itemGroups.get(feedback.id) || [];
                 ratings.push(feedback.rating);
-                itemGroups.set(feedback.itemId, ratings);
+                itemGroups.set(feedback.id, ratings);
             });
 
-            itemGroups.forEach((ratings, itemId) => {
+            itemGroups.forEach((ratings, id) => {
                 const average =
                     ratings.reduce((sum, r) => sum + r, 0) / ratings.length;
-                ratingsMap.set(itemId, average);
-                feedbackCountMap.set(itemId, ratings.length);
+                ratingsMap.set(id, average);
+                feedbackCountMap.set(id, ratings.length);
             });
         }
 
@@ -162,14 +160,14 @@ export const getBatchAverageRatings = async (
 
         // 정렬을 위한 배열 생성
         let sortedItems = Array.from(ratingsMap.entries()).map(
-            ([itemId, rating]) => {
-                const dish = dishes?.find((d) => d.id === itemId);
+            ([id, rating]) => {
+                const dish = dishes?.find((d) => d.id === id);
                 return {
-                    itemId,
+                    id,
                     rating,
                     name: dish?.name || "",
                     createdAt: dish?.createdAt || "",
-                    feedbackCount: feedbackCountMap.get(itemId) || 0,
+                    feedbackCount: feedbackCountMap.get(id) || 0,
                 };
             }
         );
@@ -202,8 +200,8 @@ export const getBatchAverageRatings = async (
 
         return {
             ratings: ratingsMap,
-            sortedItems: sortedItems.map(({ itemId, rating }) => ({
-                itemId,
+            sortedItems: sortedItems.map(({ id, rating }) => ({
+                id,
                 rating,
             })),
             errors: allErrors.length > 0 ? allErrors : null,
