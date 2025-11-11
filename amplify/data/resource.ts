@@ -9,7 +9,11 @@ const schema = a.schema({
 			name: a.string().required(),
 			brand: a.string(),
 		})
-		.authorization((allow) => [allow.guest(), allow.publicApiKey()]),
+		.authorization((allow) => [
+            allow.guest().to(['read']), // 비로그인 사용자는 읽기만
+            allow.authenticated().to(['read']), // 로그인 사용자는 읽기만
+            allow.group('admin').to(['create', 'update', 'delete', 'read']), // admin 그룹만 쓰기 가능
+        ]),
 
 	Feedback: a
 		.model({
@@ -20,7 +24,11 @@ const schema = a.schema({
 			createdAt: a.datetime().required(),
 			updatedAt: a.datetime().required(),
 		})
-		.authorization((allow) => [allow.guest(), allow.publicApiKey()]),
+		.authorization((allow) => [
+            allow.guest().to(['read']),
+            allow.authenticated().to(['create', 'read']), // 로그인 사용자는 생성 가능
+            allow.owner(), // 본인 것만 수정/삭제
+        ]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
