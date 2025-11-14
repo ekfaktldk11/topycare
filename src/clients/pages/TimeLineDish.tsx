@@ -2,10 +2,10 @@ import { Box, CircularProgress, Stack, Alert } from "@mui/material";
 import ItemListView from "../components/ItemListView";
 import { useEffect, useState } from "react";
 import { fetchDishes } from "../api/data";
-import type { Dish } from "../types/dish";
+import type { Item } from "../types/item";
 
 export default function TimelineDish() {
-    const [dishes, setDishes] = useState<Dish[]>([]);
+    const [dishes, setDishes] = useState<Item[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -26,8 +26,9 @@ export default function TimelineDish() {
                 setDishes([]);
             } else if (dish) {
                 // Schema 타입을 Dish 타입으로 변환
-                const formattedDishes: Dish[] = dish.map(d => ({
+                const formattedDishes: Item[] = dish.map(d => ({
                     id: d.id,
+                    itemType: "dish",
                     img: d.img || "",
                     name: d.name,
                     brand: d.brand || "",

@@ -3,11 +3,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import FeedbackDialogHeader from "./FeedbackDialogHeader";
 import FeedbackList from "./FeedbackList";
 import FeedbackForm from "./FeedbackForm";
-import type { Dish, Feedback } from "../../types";
+import type { Item, Feedback } from "../../types";
 
 interface FeedbackDialogProps {
     open: boolean;
-    dish: Dish;
+    item: Item;
     feedbacks: Feedback[];
     onClose: () => void;
     onSubmitFeedback: (feedback: { rating: number; content?: string }) => void;
@@ -15,7 +15,7 @@ interface FeedbackDialogProps {
 
 export default function FeedbackDialog({
     open,
-    dish,
+    item,
     feedbacks,
     onClose,
     onSubmitFeedback,
@@ -29,7 +29,7 @@ export default function FeedbackDialog({
                 </IconButton>
             </DialogTitle>
             <DialogContent sx={{ p: 0, display: "flex", flexDirection: "column", height: "70vh" }}>
-                <FeedbackDialogHeader dish={dish} />
+                <FeedbackDialogHeader item={item} />
                 <Stack sx={{ flex: 1, overflow: "auto" }}>
                     <FeedbackList feedbacks={feedbacks} />
                 </Stack>

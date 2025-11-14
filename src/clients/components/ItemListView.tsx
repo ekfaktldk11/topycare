@@ -2,7 +2,7 @@ import * as React from "react";
 import { Box, CircularProgress, Grid, List, Stack, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
-import type { Dish, ViewMode } from "../types/index";
+import type { Item, ViewMode } from "../types/index";
 import ItemCard from "./ItemCard";
 import ItemCompactRow from "./ItemCompactRow";
 import ImageDialog from "./ImageDialog";
@@ -10,7 +10,7 @@ import SortSelector from "./SortSelector";
 import { getBatchAverageRatings, type SortOption } from "../api/data";
 
 export interface ItemListViewProps {
-    items: Dish[];
+    items: Item[];
     /** 리스트 영역 높이. css height 값. 기본: 70vh */
     height?: number | string;
     /** 초기 보기 모드 */
@@ -79,14 +79,14 @@ export default function ItemListView({ items, height = "70vh", initialView = "de
                     <Grid container spacing={2}>
                         {items.map((it, idx) => (
                             <Grid key={idx} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                                <ItemCard dish={it} onZoom={setOpenImg} rating={ratings.get(it.id) || 0} />
+                                <ItemCard item={it} onZoom={setOpenImg} rating={ratings.get(it.id) || 0} />
                             </Grid>
                         ))}
                     </Grid>
                 ) : (
                     <List disablePadding>
                         {items.map((it, idx) => (
-                            <ItemCompactRow key={idx} dish={it} rating={ratings.get(it.id) || 0} />
+                            <ItemCompactRow key={idx} item={it} rating={ratings.get(it.id) || 0} />
                         ))}
                     </List>
                 )}

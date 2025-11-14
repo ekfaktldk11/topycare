@@ -1,11 +1,11 @@
 import { Box, Typography, Stack } from "@mui/material";
-import type { Dish } from "../../types";
+import type { Item } from "../../types";
 
 interface FeedbackDialogHeaderProps {
-    dish: Dish;
+    item: Item;
 }
 
-export default function FeedbackDialogHeader({ dish }: FeedbackDialogHeaderProps) {
+export default function FeedbackDialogHeader({ item }: FeedbackDialogHeaderProps) {
     return (
         <Box
             sx={{
@@ -20,16 +20,16 @@ export default function FeedbackDialogHeader({ dish }: FeedbackDialogHeaderProps
         >
             <Stack direction="row" gap={2} alignItems="center">
                 <img
-                    src={dish.img}
-                    alt={dish.name}
+                    src={item.img}
+                    alt={item.name}
                     style={{ width: 64, height: 64, borderRadius: 8, objectFit: "cover" }}
                 />
                 <Stack>
                     <Typography variant="subtitle1" fontWeight={700}>
-                        {dish.name}
+                        {item.name}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        {dish.brand}
+                        {item.brand}
                     </Typography>
                 </Stack>
             </Stack>

@@ -1,27 +1,39 @@
 import { ListItem, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
-import type { Dish } from "../types/index";
+import type { Item } from "../types/index";
 import FeedbackDialog from "./feedback/FeedbackDialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { renderStars } from "../utils/renderStars";
-import { createFeedback } from "../api/data";
+import { createFeedback, getAverageRating } from "../api/data";
 import { getCurrentUser } from "aws-amplify/auth";
 
 type ItemCompactRowProps = {
-    dish: Dish;
+    item: Item;
     rating?: number;
 };
 
-export default function ItemCompactRow({ dish, rating = 0 }: ItemCompactRowProps) {
+export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
-    const starScore = Math.max(0, Math.min(5, isFinite(rating) ? rating : 0));
+    const [starScore, setStarScore] = useState(Math.max(0, Math.min(5, isFinite(rating) ? rating : 0)));
+
+    useEffect(() => {
+        const fetchRating = async () => {
+            const { averageRating, errors } = await getAverageRating(item.id, item.itemType);
+            if (errors) {
+                console.error("Error fetching average rating:", errors);
+            } else if (averageRating !== null) {
+                setStarScore(Math.max(0, Math.min(5, averageRating)));
+            }
+        };
+        fetchRating();
+    }, [item.id]);
 
     const handleSubmitFeedback = async (feedback: { rating: number; content?: string }) => {
         try {
             const user = await getCurrentUser();
             const result = await createFeedback(
-                dish.id,
-                user.userId,
-                "dish",
+                item.id,
+                //user.userId,
+                item.itemType,
                 feedback.rating,
                 feedback.content
             );
@@ -29,16 +41,20 @@ export default function ItemCompactRow({ dish, rating = 0 }: ItemCompactRowProps
             if (result.newFeedback) {
                 console.log("Feedback created successfully:", result.newFeedback);
                 setDialogOpen(false);
-                // TODO: 성공 메시지 표시, 리스트 새로고침
+                // Refresh rating
+                const { averageRating } = await getAverageRating(item.id, item.itemType);
+                if (averageRating !== null) {
+                    setStarScore(Math.max(0, Math.min(5, averageRating)));
+                }
             } else {
                 console.error("Failed to create feedback:", result.errors);
-                // TODO: 에러 메시지 표시
             }
         } catch (error) {
             console.error("Error submitting feedback:", error);
-            // TODO: 에러 메시지 표시 (로그인 필요 등)
         }
     };
+
+    // ... rest of component remains the same
 
     return (
         <>
@@ -47,11 +63,11 @@ export default function ItemCompactRow({ dish, rating = 0 }: ItemCompactRowProps
                     <ListItemText
                         primary={
                             <Stack direction={{ xs: "column", sm: "row" }} gap={1} alignItems={{ xs: "flex-start", sm: "center" }}>
-                                <Typography variant="body1" sx={{ fontWeight: 600 }} noWrap title={dish.name}>
-                                    {dish.name}
+                                <Typography variant="body1" sx={{ fontWeight: 600 }} noWrap title={item.name}>
+                                    {item.name}
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary" noWrap title={dish.brand}>
-                                    {dish.brand}
+                                <Typography variant="body2" color="text.secondary" noWrap title={item.brand}>
+                                    {item.brand}
                                 </Typography>
                                 <Stack direction="row" alignItems="center" sx={{ ml: { sm: "auto" } }}>
                                     {renderStars(starScore)}
@@ -66,7 +82,7 @@ export default function ItemCompactRow({ dish, rating = 0 }: ItemCompactRowProps
             </ListItem>
             <FeedbackDialog
                 open={dialogOpen}
-                dish={dish}
+                item={item}
                 feedbacks={[]}
                 onClose={() => setDialogOpen(false)}
                 onSubmitFeedback={handleSubmitFeedback}

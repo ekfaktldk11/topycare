@@ -1,3 +1,3 @@
-export * from "./dish";
+export * from "./item";
 export * from "./view";
 export * from "./feedback";

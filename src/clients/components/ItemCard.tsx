@@ -1,29 +1,41 @@
 import { Box, Card, CardContent, IconButton, Stack, Typography } from "@mui/material";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import type { Dish } from "../types/index";
+import type { Item } from "../types/index";
 import FeedbackDialog from "./feedback/FeedbackDialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { renderStars } from "../utils/renderStars";
-import { createFeedback } from "../api/data";
+import { createFeedback, getAverageRating } from "../api/data";
 import { getCurrentUser } from "aws-amplify/auth";
 
 type ItemCardProps = {
-    dish: Dish;
+    item: Item;
     onZoom: (src: string) => void;
     rating?: number;
 };
 
-export default function ItemCard({ dish, onZoom, rating = 0 }: ItemCardProps) {
+export default function ItemCard({ item, onZoom, rating = 0 }: ItemCardProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
-    const starScore = Math.max(0, Math.min(5, isFinite(rating) ? rating : 0));
+    const [starScore, setStarScore] = useState(Math.max(0, Math.min(5, isFinite(rating) ? rating : 0)));
+
+    useEffect(() => {
+        const fetchRating = async () => {
+            const { averageRating, errors } = await getAverageRating(item.id, item.itemType);
+            if (errors) {
+                console.error("Error fetching average rating:", errors);
+            } else if (averageRating !== null) {
+                setStarScore(Math.max(0, Math.min(5, averageRating)));
+            }
+        };
+        fetchRating();
+    }, [item.id]);
 
     const handleSubmitFeedback = async (feedback: { rating: number; content?: string }) => {
         try {
-            const user = await getCurrentUser();
+            //const user = await getCurrentUser();
             const result = await createFeedback(
-                dish.id,
-                user.userId,
-                "dish",
+                item.id,
+                //user.userId,
+                item.itemType,
                 feedback.rating,
                 feedback.content
             );
@@ -31,14 +43,16 @@ export default function ItemCard({ dish, onZoom, rating = 0 }: ItemCardProps) {
             if (result.newFeedback) {
                 console.log("Feedback created successfully:", result.newFeedback);
                 setDialogOpen(false);
-                // TODO: 성공 메시지 표시, 리스트 새로고침
+                // Refresh rating
+                const { averageRating } = await getAverageRating(item.id, item.itemType);
+                if (averageRating !== null) {
+                    setStarScore(Math.max(0, Math.min(5, averageRating)));
+                }
             } else {
                 console.error("Failed to create feedback:", result.errors);
-                // TODO: 에러 메시지 표시
             }
         } catch (error) {
             console.error("Error submitting feedback:", error);
-            // TODO: 에러 메시지 표시 (로그인 필요 등)
         }
     };
 
@@ -66,7 +80,7 @@ export default function ItemCard({ dish, onZoom, rating = 0 }: ItemCardProps) {
                                 aria-label="이미지 확대"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onZoom(dish.img);
+                                    onZoom(item.img);
                                 }}
                                 sx={{ position: "absolute", right: 4, top: 4, bgcolor: "rgba(0,0,0,0.45)", color: "common.white", "&:hover": { bgcolor: "rgba(0,0,0,0.6)" } }}
                                 size="small"
@@ -75,8 +89,8 @@ export default function ItemCard({ dish, onZoom, rating = 0 }: ItemCardProps) {
                             </IconButton>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                                src={dish.img}
-                                alt={dish.name}
+                                src={item.img}
+                                alt={item.name}
                                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                                 onError={(e) => {
                                     const target = e.currentTarget as HTMLImageElement;
@@ -88,11 +102,11 @@ export default function ItemCard({ dish, onZoom, rating = 0 }: ItemCardProps) {
                         {/* 텍스트/메타 */}
                         <CardContent sx={{ p: 0, flex: 1, minWidth: 0 }}>
                             <Stack gap={0.75} sx={{ height: "100%" }}>
-                                <Typography variant="subtitle1" component="h3" noWrap title={dish.name} sx={{ fontWeight: 700 }}>
-                                    {dish.name}
+                                <Typography variant="subtitle1" component="h3" noWrap title={item.name} sx={{ fontWeight: 700 }}>
+                                    {item.name}
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary" noWrap title={dish.brand}>
-                                    {dish.brand}
+                                <Typography variant="body2" color="text.secondary" noWrap title={item.brand}>
+                                    {item.brand}
                                 </Typography>
                                 <Stack gap={0.5} mt="auto">
                                     <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -114,7 +128,7 @@ export default function ItemCard({ dish, onZoom, rating = 0 }: ItemCardProps) {
             </Card>
             <FeedbackDialog
                 open={dialogOpen}
-                dish={dish}
+                item={item}
                 feedbacks={[]}
                 onClose={() => setDialogOpen(false)}
                 onSubmitFeedback={handleSubmitFeedback}

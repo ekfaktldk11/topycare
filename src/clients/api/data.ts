@@ -51,7 +51,8 @@ export type FeedbackCreateResult = {
  * 새로운 피드백을 생성합니다.
  */
 export const createFeedback = async (
-    userId: string,
+    itemId: string,
+    //userId: string,
     itemType: string,
     rating: number,
     content?: string
@@ -59,7 +60,8 @@ export const createFeedback = async (
     try {
         const { data: newFeedback, errors } =
             await client.models.Feedback.create({
-                userId: userId,
+                itemId: itemId,
+                //userId: userId,
                 itemType: itemType,
                 rating: rating,
                 content: content,
@@ -89,13 +91,13 @@ export type AverageRatingResult = {
  * 특정 id와 itemType에 대한 rating 평균을 계산합니다.
  */
 export const getAverageRating = async (
-    id: string,
+    itemId: string,
     itemType: string
 ): Promise<AverageRatingResult> => {
     try {
         const { data: feedbacks, errors } = await client.models.Feedback.list({
             filter: {
-                id: { eq: id },
+                itemId: { eq: itemId },
                 itemType: { eq: itemType },
             },
         });
