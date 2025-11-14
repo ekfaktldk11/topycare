@@ -3,8 +3,9 @@ import type { Item } from "../types/index";
 import FeedbackDialog from "./feedback/FeedbackDialog";
 import { useState, useEffect } from "react";
 import { renderStars } from "../utils/renderStars";
-import { createFeedback, getAverageRating } from "../api/data";
+import { createFeedback, getAverageRating, getFeedbacks } from "../api/data";
 import { getCurrentUser } from "aws-amplify/auth";
+import type { Schema } from "../../../amplify/data/resource";
 
 type ItemCompactRowProps = {
     item: Item;
@@ -14,6 +15,7 @@ type ItemCompactRowProps = {
 export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [starScore, setStarScore] = useState(Math.max(0, Math.min(5, isFinite(rating) ? rating : 0)));
+    const [feedbacks, setFeedbacks] = useState<Schema["Feedback"]["type"][]>([]);
 
     useEffect(() => {
         const fetchRating = async () => {
@@ -25,14 +27,27 @@ export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps
             }
         };
         fetchRating();
-    }, [item.id]);
+    }, [item.id, item.itemType]);
+
+    useEffect(() => {
+        const fetchFeedbackList = async () => {
+            const { feedbacks: feedbackList, errors } = await getFeedbacks(item.id, item.itemType);
+            if (errors) {
+                console.error("Error fetching feedbacks:", errors);
+            } else if (feedbackList) {
+                setFeedbacks(feedbackList);
+            }
+        };
+        if (dialogOpen) {
+            fetchFeedbackList();
+        }
+    }, [dialogOpen, item.id, item.itemType]);
 
     const handleSubmitFeedback = async (feedback: { rating: number; content?: string }) => {
         try {
             const user = await getCurrentUser();
             const result = await createFeedback(
                 item.id,
-                //user.userId,
                 item.itemType,
                 feedback.rating,
                 feedback.content
@@ -41,10 +56,14 @@ export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps
             if (result.newFeedback) {
                 console.log("Feedback created successfully:", result.newFeedback);
                 setDialogOpen(false);
-                // Refresh rating
+                // Refresh rating and feedbacks
                 const { averageRating } = await getAverageRating(item.id, item.itemType);
                 if (averageRating !== null) {
                     setStarScore(Math.max(0, Math.min(5, averageRating)));
+                }
+                const { feedbacks: feedbackList } = await getFeedbacks(item.id, item.itemType);
+                if (feedbackList) {
+                    setFeedbacks(feedbackList);
                 }
             } else {
                 console.error("Failed to create feedback:", result.errors);
@@ -53,9 +72,6 @@ export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps
             console.error("Error submitting feedback:", error);
         }
     };
-
-    // ... rest of component remains the same
-
     return (
         <>
             <ListItem disablePadding divider onClick={() => setDialogOpen(true)}>
@@ -83,7 +99,7 @@ export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps
             <FeedbackDialog
                 open={dialogOpen}
                 item={item}
-                feedbacks={[]}
+                feedbacks={feedbacks}
                 onClose={() => setDialogOpen(false)}
                 onSubmitFeedback={handleSubmitFeedback}
             />

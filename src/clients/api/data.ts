@@ -252,3 +252,38 @@ export const getBatchAverageRatings = async (
         };
     }
 };
+
+export type FeedbackListResult = {
+    feedbacks: Schema["Feedback"]["type"][] | null;
+    errors: any[] | null;
+};
+
+/**
+ * 특정 itemId와 itemType에 대한 모든 피드백을 가져옵니다.
+ */
+export const getFeedbacks = async (
+    itemId: string,
+    itemType: string
+): Promise<FeedbackListResult> => {
+    try {
+        const { data: feedbacks, errors } = await client.models.Feedback.list({
+            filter: {
+                itemId: { eq: itemId },
+                itemType: { eq: itemType },
+            },
+        });
+
+        if (errors) {
+            console.error("Error fetching feedbacks:", errors);
+            return { feedbacks: null, errors };
+        }
+
+        return { feedbacks: feedbacks || [], errors: null };
+    } catch (error) {
+        console.error(
+            "An unexpected error occurred while fetching feedbacks:",
+            error
+        );
+        return { feedbacks: null, errors: [error as any] };
+    }
+};
