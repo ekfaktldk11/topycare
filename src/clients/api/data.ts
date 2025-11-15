@@ -21,7 +21,7 @@ export const createDish = async (
             img: img,
             name: name,
             brand: brand,
-        });
+        }, { authMode: "userPool" });
 
         if (errors) {
             console.error("Error creating dish:", errors);
@@ -52,7 +52,6 @@ export type FeedbackCreateResult = {
  */
 export const createFeedback = async (
     itemId: string,
-    //userId: string,
     itemType: string,
     rating: number,
     content?: string
@@ -61,13 +60,12 @@ export const createFeedback = async (
         const { data: newFeedback, errors } =
             await client.models.Feedback.create({
                 itemId: itemId,
-                //userId: userId,
                 itemType: itemType,
                 rating: rating,
                 content: content,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
-            });
+            }, { authMode: "userPool" });
 
         if (errors) {
             console.error("Error creating feedback:", errors);
@@ -285,5 +283,84 @@ export const getFeedbacks = async (
             error
         );
         return { feedbacks: null, errors: [error as any] };
+    }
+};
+
+export type FeedbackUpdateResult = {
+    updatedFeedback: Schema["Feedback"]["type"] | null;
+    errors: any[] | undefined;
+};
+
+/**
+ * 기존 피드백을 수정합니다.
+ */
+export const updateFeedback = async (
+    feedbackId: string,
+    rating?: number,
+    content?: string
+): Promise<FeedbackUpdateResult> => {
+    try {
+        const updateData: any = {
+            updatedAt: new Date().toISOString(),
+        };
+        
+        if (rating !== undefined) {
+            updateData.rating = rating;
+        }
+        
+        if (content !== undefined) {
+            updateData.content = content;
+        }
+
+        const { data: updatedFeedback, errors } =
+            await client.models.Feedback.update({
+                id: feedbackId,
+                ...updateData,
+            }, { authMode: "userPool" });
+
+        if (errors) {
+            console.error("Error updating feedback:", errors);
+            return { updatedFeedback: null, errors };
+        }
+
+        return { updatedFeedback, errors };
+    } catch (error) {
+        console.error(
+            "An unexpected error occurred while updating feedback:",
+            error
+        );
+        return { updatedFeedback: null, errors: [error as any] };
+    }
+};
+
+export type FeedbackDeleteResult = {
+    deletedFeedback: Schema["Feedback"]["type"] | null;
+    errors: any[] | undefined;
+};
+
+/**
+ * 피드백을 삭제합니다.
+ */
+export const deleteFeedback = async (
+    feedbackId: string
+): Promise<FeedbackDeleteResult> => {
+    try {
+        const { data: deletedFeedback, errors } =
+            await client.models.Feedback.delete({
+                id: feedbackId,
+            }, { authMode: "userPool" });
+
+        if (errors) {
+            console.error("Error deleting feedback:", errors);
+            return { deletedFeedback: null, errors };
+        }
+
+        return { deletedFeedback, errors };
+    } catch (error) {
+        console.error(
+            "An unexpected error occurred while deleting feedback:",
+            error
+        );
+        return { deletedFeedback: null, errors: [error as any] };
     }
 };
