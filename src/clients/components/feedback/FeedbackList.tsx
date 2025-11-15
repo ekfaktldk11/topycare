@@ -1,28 +1,22 @@
-import { List, ListItem, ListItemText, Stack, Typography } from "@mui/material";
-import { renderStars } from "../../utils/renderStars";
-import type { Feedback } from "../../types";
+import { List } from "@mui/material";
+import type { Schema } from "../../../../amplify/data/resource";
+import FeedbackItem from "./FeedbackItem";
 
 interface FeedbackListProps {
-    feedbacks: Feedback[];
+    feedbacks: Schema["Feedback"]["type"][];
+    onFeedbackUpdate: () => void;
 }
 
-export default function FeedbackList({ feedbacks }: FeedbackListProps) {
+export default function FeedbackList({ feedbacks, onFeedbackUpdate }: FeedbackListProps) {
     return (
         <List disablePadding>
             {feedbacks.map((feedback) => (
-                <ListItem key={feedback.id} divider>
-                    <ListItemText
-                        primary={
-                            <Stack direction="row" alignItems="center" gap={0.5}>
-                                {renderStars(feedback.rating)}
-                                <Typography variant="body1" fontWeight={600}>
-                                    {feedback.rating} / 5
-                                </Typography>
-                            </Stack>
-                        }
-                        secondary={feedback.content}
-                    />
-                </ListItem>
+                <FeedbackItem
+                    key={feedback.id}
+                    feedback={feedback}
+                    onUpdate={onFeedbackUpdate}
+                    onDelete={onFeedbackUpdate}
+                />
             ))}
         </List>
     );

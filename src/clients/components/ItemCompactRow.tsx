@@ -4,7 +4,6 @@ import FeedbackDialog from "./feedback/FeedbackDialog";
 import { useState, useEffect } from "react";
 import { renderStars } from "../utils/renderStars";
 import { createFeedback, getAverageRating, getFeedbacks } from "../api/data";
-import { getCurrentUser } from "aws-amplify/auth";
 import type { Schema } from "../../../amplify/data/resource";
 
 type ItemCompactRowProps = {
@@ -45,7 +44,6 @@ export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps
 
     const handleSubmitFeedback = async (feedback: { rating: number; content?: string }) => {
         try {
-            const user = await getCurrentUser();
             const result = await createFeedback(
                 item.id,
                 item.itemType,
@@ -72,6 +70,18 @@ export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps
             console.error("Error submitting feedback:", error);
         }
     };
+
+    const refreshFeedbacks = async () => {
+        const { feedbacks: feedbackList } = await getFeedbacks(item.id, item.itemType);
+        if (feedbackList) {
+            setFeedbacks(feedbackList);
+        }
+        const { averageRating } = await getAverageRating(item.id, item.itemType);
+        if (averageRating !== null) {
+            setStarScore(Math.max(0, Math.min(5, averageRating)));
+        }
+    };
+
     return (
         <>
             <ListItem disablePadding divider onClick={() => setDialogOpen(true)}>
@@ -102,6 +112,7 @@ export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps
                 feedbacks={feedbacks}
                 onClose={() => setDialogOpen(false)}
                 onSubmitFeedback={handleSubmitFeedback}
+                onFeedbackUpdate={refreshFeedbacks}
             />
         </>
     );

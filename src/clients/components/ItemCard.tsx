@@ -5,7 +5,6 @@ import FeedbackDialog from "./feedback/FeedbackDialog";
 import { useState, useEffect } from "react";
 import { renderStars } from "../utils/renderStars";
 import { createFeedback, getAverageRating, getFeedbacks } from "../api/data";
-import { getCurrentUser } from "aws-amplify/auth";
 import type { Schema } from "../../../amplify/data/resource";
 
 type ItemCardProps = {
@@ -71,6 +70,17 @@ export default function ItemCard({ item, onZoom, rating = 0 }: ItemCardProps) {
             }
         } catch (error) {
             console.error("Error submitting feedback:", error);
+        }
+    };
+
+    const refreshFeedbacks = async () => {
+        const { feedbacks: feedbackList } = await getFeedbacks(item.id, item.itemType);
+        if (feedbackList) {
+            setFeedbacks(feedbackList);
+        }
+        const { averageRating } = await getAverageRating(item.id, item.itemType);
+        if (averageRating !== null) {
+            setStarScore(Math.max(0, Math.min(5, averageRating)));
         }
     };
 
@@ -150,6 +160,7 @@ export default function ItemCard({ item, onZoom, rating = 0 }: ItemCardProps) {
                 feedbacks={feedbacks}
                 onClose={() => setDialogOpen(false)}
                 onSubmitFeedback={handleSubmitFeedback}
+                onFeedbackUpdate={refreshFeedbacks}
             />
         </>
     );

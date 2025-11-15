@@ -3,14 +3,16 @@ import CloseIcon from "@mui/icons-material/Close";
 import FeedbackDialogHeader from "./FeedbackDialogHeader";
 import FeedbackList from "./FeedbackList";
 import FeedbackForm from "./FeedbackForm";
-import type { Item, Feedback } from "../../types";
+import type { Item } from "../../types";
+import type { Schema } from "../../../../amplify/data/resource";
 
 interface FeedbackDialogProps {
     open: boolean;
     item: Item;
-    feedbacks: Feedback[];
+    feedbacks: Schema["Feedback"]["type"][];
     onClose: () => void;
     onSubmitFeedback: (feedback: { rating: number; content?: string }) => void;
+    onFeedbackUpdate: () => void;
 }
 
 export default function FeedbackDialog({
@@ -19,6 +21,7 @@ export default function FeedbackDialog({
     feedbacks,
     onClose,
     onSubmitFeedback,
+    onFeedbackUpdate,
 }: FeedbackDialogProps) {
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -31,7 +34,7 @@ export default function FeedbackDialog({
             <DialogContent sx={{ p: 0, display: "flex", flexDirection: "column", height: "70vh" }}>
                 <FeedbackDialogHeader item={item} />
                 <Stack sx={{ flex: 1, overflow: "auto" }}>
-                    <FeedbackList feedbacks={feedbacks} />
+                    <FeedbackList feedbacks={feedbacks} onFeedbackUpdate={onFeedbackUpdate} />
                 </Stack>
                 <FeedbackForm onSubmit={onSubmitFeedback} />
             </DialogContent>
