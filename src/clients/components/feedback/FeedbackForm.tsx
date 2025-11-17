@@ -52,6 +52,12 @@ export default function FeedbackForm({ onSubmit }: FeedbackFormProps) {
                     onChange={(e) => setFeedback(e.target.value)}
                     placeholder="추가 의견을 남겨주세요... (선택사항)"
                     variant="outlined"
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                            e.preventDefault(); // 새 줄이 입력되는 기본 동작 방지
+                            handleSubmit();
+                        }
+                    }}
                 />
 
                 {/* 제출 버튼 */}
