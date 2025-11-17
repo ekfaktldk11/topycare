@@ -146,7 +146,7 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
                             <Rating
                                 value={editRating}
                                 onChange={(_, newValue) => setEditRating(newValue || 0)}
-                                precision={0.5}
+                                precision={1}
                                 max={5}
                             />
                             <Typography variant="caption" sx={{ ml: 1 }}>
@@ -179,6 +179,10 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
                         feedback.content
                     )
                 }
+                slotProps={{
+                    primary: { component: 'div' },
+                    secondary: { component: 'div' },
+                }}
             />
         </ListItem>
     );
