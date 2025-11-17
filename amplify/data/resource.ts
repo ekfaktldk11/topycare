@@ -18,12 +18,9 @@ const schema = a.schema({
 		.model({
 			itemId: a.string().required(),
 			// owner 필드는 allow.owner() 가 자동으로 추가/관리해줌
-			// 필요하면 createdAt/updatedAt 은 클라이언트/함수에서 채워도 OK
 			itemType: a.string().required(),
 			rating: a.integer().required(),
 			content: a.string(),
-			createdAt: a.datetime().required(),
-			updatedAt: a.datetime().required(),
 		})
 		.authorization((allow) => [
 			allow.publicApiKey().to(["read"]),

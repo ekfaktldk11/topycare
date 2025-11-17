@@ -80,8 +80,6 @@ export const createFeedback = async (
                 itemType: itemType,
                 rating: rating,
                 content: content,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
             }, { authMode: "userPool" });
 
         if (errors) {
@@ -326,23 +324,26 @@ export const updateFeedback = async (
     content?: string
 ): Promise<FeedbackUpdateResult> => {
     try {
-        const updateData: any = {
-            updatedAt: new Date().toISOString(),
+        const updateData: {
+            id: string;
+            rating?: number;
+            content?: string;
+        } = {
+            id: feedbackId,
         };
-        
+
         if (rating !== undefined) {
             updateData.rating = rating;
         }
-        
+
         if (content !== undefined) {
             updateData.content = content;
         }
 
         const { data: updatedFeedback, errors } =
-            await client.models.Feedback.update({
-                id: feedbackId,
-                ...updateData,
-            }, { authMode: "userPool" });
+            await client.models.Feedback.update(updateData, {
+                authMode: "userPool",
+            });
 
         if (errors) {
             console.error("Error updating feedback:", errors);
