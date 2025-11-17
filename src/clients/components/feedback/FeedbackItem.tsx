@@ -37,8 +37,6 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
     const checkOwnership = async () => {
         try {
             const user = await getCurrentUser();
-            console.log("Current user:", user);
-            console.log("Feedback owner:", feedback.owner);
             setIsOwner(feedback.owner === user.username);
         } catch (error) {
             console.error("Error checking ownership:", error);
@@ -54,7 +52,6 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
             );
 
             if (result.updatedFeedback) {
-                console.log("Feedback updated successfully");
                 setIsEditing(false);
                 onUpdate();
             } else {
@@ -74,7 +71,6 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
             const result = await deleteFeedback(feedback.id);
 
             if (result.deletedFeedback) {
-                console.log("Feedback deleted successfully");
                 onDelete();
             } else {
                 console.error("Failed to delete feedback:", result.errors);

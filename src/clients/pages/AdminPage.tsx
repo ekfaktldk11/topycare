@@ -60,7 +60,6 @@ export default function AdminPage() {
             if (result.newDish) {
                 setSuccess(true);
                 setFormData({ img: "", name: "", brand: "" });
-                console.log("Dish created successfully:", result.newDish);
             } else {
                 setError("상품 추가에 실패했습니다. 다시 시도해주세요.");
                 console.error("Failed to create dish:", result.errors);

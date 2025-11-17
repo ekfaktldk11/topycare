@@ -54,7 +54,6 @@ export default function ItemCard({ item, onZoom, rating = 0 }: ItemCardProps) {
             );
 
             if (result.newFeedback) {
-                console.log("Feedback created successfully:", result.newFeedback);
                 setDialogOpen(false);
                 // Refresh rating and feedbacks
                 const { averageRating } = await getAverageRating(item.id, item.itemType);

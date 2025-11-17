@@ -52,7 +52,6 @@ export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps
             );
 
             if (result.newFeedback) {
-                console.log("Feedback created successfully:", result.newFeedback);
                 setDialogOpen(false);
                 // Refresh rating and feedbacks
                 const { averageRating } = await getAverageRating(item.id, item.itemType);

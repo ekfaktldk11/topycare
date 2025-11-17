@@ -39,7 +39,6 @@ export const createDish = async (
 
 export const fetchDishes = async () => {
     const { data: dish, errors } = await client.models.Dish.list();
-    //console.log("Fetched dish:", dish, errors);
     return { dish, errors };
 };
 
