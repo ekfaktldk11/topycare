@@ -55,15 +55,14 @@ export const createFeedback = async (
     itemType: string,
     rating: number,
     content?: string,
-    ownerValue?: string,
 ): Promise<FeedbackCreateResult> => {
     try {
         const alreadyExists = await client.models.Feedback.list({
             filter: {
                 itemId: { eq: itemId },
                 itemType: { eq: itemType },
-                owner: { eq: ownerValue },
             },
+            authMode: "userPool",
         });
 
         if (alreadyExists.data && alreadyExists.data.length > 0) {

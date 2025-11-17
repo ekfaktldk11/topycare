@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import { renderStars } from "../utils/renderStars";
 import { createFeedback, getAverageRating, getFeedbacks } from "../api/data";
 import type { Schema } from "../../../amplify/data/resource";
-import { useAuth } from "../context/AuthContext";
 
 type ItemCardProps = {
     item: Item;
@@ -15,7 +14,6 @@ type ItemCardProps = {
 };
 
 export default function ItemCard({ item, onZoom, rating = 0 }: ItemCardProps) {
-    const { user } = useAuth();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [starScore, setStarScore] = useState(Math.max(0, Math.min(5, isFinite(rating) ? rating : 0)));
     const [feedbacks, setFeedbacks] = useState<Schema["Feedback"]["type"][]>([]);
@@ -53,7 +51,6 @@ export default function ItemCard({ item, onZoom, rating = 0 }: ItemCardProps) {
                 item.itemType,
                 feedback.rating,
                 feedback.content,
-                `${user?.userId}::${user?.username}`,
             );
 
             if (result.newFeedback) {
