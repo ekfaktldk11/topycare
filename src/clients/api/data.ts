@@ -45,6 +45,7 @@ export const fetchDishes = async () => {
 export type FeedbackCreateResult = {
     newFeedback: Schema["Feedback"]["type"] | null;
     errors: any[] | undefined;
+    duplicated?: boolean;
 };
 /**
  * 새로운 피드백을 생성합니다.
@@ -53,9 +54,27 @@ export const createFeedback = async (
     itemId: string,
     itemType: string,
     rating: number,
-    content?: string
+    content?: string,
+    ownerValue?: string,
 ): Promise<FeedbackCreateResult> => {
     try {
+        const alreadyExists = await client.models.Feedback.list({
+            filter: {
+                itemId: { eq: itemId },
+                itemType: { eq: itemType },
+                owner: { eq: ownerValue },
+            },
+        });
+
+        if (alreadyExists.data && alreadyExists.data.length > 0) {
+            window.alert("피드백은 한 번만 작성할 수 있습니다.\n추가할 내용은 수정 기능을 이용해 주세요.");
+            return {
+                newFeedback: null,
+                errors: undefined,
+                duplicated: true,
+            };
+        }
+
         const { data: newFeedback, errors } =
             await client.models.Feedback.create({
                 itemId: itemId,
