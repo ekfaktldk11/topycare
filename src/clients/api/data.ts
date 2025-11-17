@@ -181,31 +181,40 @@ export const getBatchAverageRatings = async (
             allErrors.push(...errors);
         }
 
-        // id별로 rating 평균 계산
+        // itemId별로 rating 평균 계산
         if (feedbacks && feedbacks.length > 0) {
             const itemGroups = new Map<string, number[]>();
 
             feedbacks.forEach((feedback) => {
-                const ratings = itemGroups.get(feedback.id) || [];
+                const ratings = itemGroups.get(feedback.itemId) || []; // ✅ feedback.id → feedback.itemId
                 ratings.push(feedback.rating);
-                itemGroups.set(feedback.id, ratings);
+                itemGroups.set(feedback.itemId, ratings);
             });
 
-            itemGroups.forEach((ratings, id) => {
+            itemGroups.forEach((ratings, itemId) => {
                 const average =
                     ratings.reduce((sum, r) => sum + r, 0) / ratings.length;
-                ratingsMap.set(id, average);
-                feedbackCountMap.set(id, ratings.length);
+                ratingsMap.set(itemId, average);
+                feedbackCountMap.set(itemId, ratings.length);
             });
         }
 
         // Dish 정보 가져오기 (이름과 생성시각 정렬을 위해)
-        const { data: dishes, errors: dishErrors } =
-            await client.models.Dish.list();
+        const dishIds = Array.from(ratingsMap.keys());
+        const dishPromises = dishIds.map((id) =>
+            client.models.Dish.get({ id })
+        );
+        const dishResults = await Promise.all(dishPromises);
+        const dishes = dishResults
+            .map((result) => result.data)
+            .filter((item) => item !== null) as Schema["Dish"]["type"][];
+        const dishErrors = dishResults
+            .map((result) => result.errors)
+            .filter((errs) => errs && errs.length > 0)
+            .flat();
 
-        if (dishErrors) {
-            console.error("Error fetching dishes:", dishErrors);
-            allErrors.push(...dishErrors);
+        if (dishErrors.length > 0) {
+            throw new Error("Error fetching dishes");
         }
 
         // 정렬을 위한 배열 생성
