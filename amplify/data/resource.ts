@@ -1,6 +1,17 @@
 import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
 
 const schema = a.schema({
+    UserProfile: a
+        .model({
+            nickname: a.string(),
+            avatarUrl: a.string(),
+            feedbacks: a.hasMany("Feedback", "userProfileId"), // UserProfile : Feedback = 1 : N 관계
+        })
+        .authorization((allow) => [
+            allow.owner(),
+            allow.publicApiKey().to(["read"]),
+        ]),
+
     Dish: a
         .model({
             img: a.string(),
@@ -21,6 +32,8 @@ const schema = a.schema({
             itemType: a.string().required(),
             rating: a.integer().required(),
             content: a.string(),
+            userProfileId: a.id(), // Foreign Key
+            author: a.belongsTo("UserProfile", "userProfileId"),
         })
         .authorization((allow) => [
             allow.publicApiKey().to(["read"]),
