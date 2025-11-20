@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
 import { Hub } from "aws-amplify/utils";
 import type { AuthUser } from "aws-amplify/auth";
+import { ensureUserProfile } from "../api/data";
 
 type AuthContextType = {
     user: AuthUser | null;
@@ -40,6 +41,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 setIsAdmin(false);
             }
             setUser(currentUser);
+
+            try {
+                await ensureUserProfile();
+            } catch (profileError) {
+                console.error("Failed to ensure user profile:", profileError);
+            }
+
         } catch (error) {
             setUser(null);
             setIsAdmin(false);

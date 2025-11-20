@@ -1,7 +1,69 @@
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../../amplify/data/resource";
+import { fetchUserAttributes, getCurrentUser } from "aws-amplify/auth";
 
 const client = generateClient<Schema>();
+
+// ✅ 간단한 메모리 캐시 추가
+let cachedUserProfileId: string | null = null;
+
+export type ensureUserProfileResult = Schema["UserProfile"]["type"] | null;
+
+/**
+ * 현재 로그인한 사용자의 UserProfile을 가져오거나, 없으면 생성합니다.
+ * 성공 시 ID를 캐싱합니다.
+ */
+export const ensureUserProfile = async (): Promise<ensureUserProfileResult> => {
+    try {
+        // 1. 이미 캐싱된 ID가 있다면 리턴하지 않고, 확실하게 DB를 확인하여 최신화 (선택사항)
+        // 여기서는 DB 확인 로직 유지
+
+        const { data: profiles } = await client.models.UserProfile.list({
+            authMode: "userPool",
+        });
+
+        if (profiles.length > 0) {
+            cachedUserProfileId = profiles[0].id; // ✅ 캐싱
+            return profiles[0];
+        }
+
+        const user = await getCurrentUser();
+        const attributes = await fetchUserAttributes();
+        
+        const { data: newProfile, errors } = await client.models.UserProfile.create({
+            nickname: attributes.name || user.username,
+            avatarUrl: attributes.picture || "",
+        }, { authMode: "userPool" });
+
+        if (errors) throw new Error("Failed to create user profile");
+        
+        cachedUserProfileId = newProfile?.id ?? null; // ✅ 캐싱
+        return newProfile;
+    } catch (error) {
+        console.error("Error ensuring user profile:", error);
+        return null;
+    }
+};
+
+/**
+ * 현재 유저의 프로필 ID를 가져옵니다.
+ */
+const getUserProfileId = async (): Promise<string | null> => {
+    // 1. 캐시 확인
+    if (cachedUserProfileId) return cachedUserProfileId;
+
+    // 2. 캐시 없으면 DB 조회 (생성은 안 함)
+    const { data: profiles } = await client.models.UserProfile.list({
+        authMode: "userPool",
+    });
+
+    if (profiles.length > 0) {
+        cachedUserProfileId = profiles[0].id;
+        return profiles[0].id;
+    }
+    
+    return null;
+};
 
 export type DishCreateResult = {
     newDish: Schema["Dish"]["type"] | null;
@@ -47,6 +109,7 @@ export type FeedbackCreateResult = {
     errors: any[] | undefined;
     duplicated?: boolean;
 };
+
 /**
  * 새로운 피드백을 생성합니다.
  */
@@ -74,12 +137,22 @@ export const createFeedback = async (
             };
         }
 
+        // 2. UserProfile ID 가져오기 (캐시 or 조회)
+        const profileId = await getUserProfileId();
+        
+        if (!profileId) {
+            // 프로필이 없으면 에러 처리 (App.tsx에서 ensureUserProfile이 실패했거나 호출 안됨)
+            return { newFeedback: null, errors: [{ message: "User profile not found. Please refresh the page." }] };
+        }
+
+        // 3. 피드백 생성
         const { data: newFeedback, errors } =
             await client.models.Feedback.create({
                 itemId: itemId,
                 itemType: itemType,
                 rating: rating,
                 content: content,
+                userProfileId: profileId, // ✅ 가져온 ID 사용
             }, { authMode: "userPool" });
 
         if (errors) {
@@ -281,7 +354,7 @@ export type FeedbackListResult = {
 };
 
 /**
- * 특정 itemId와 itemType에 대한 모든 피드백을 가져옵니다.
+ * 특정 itemId와 itemType에 대한 모든 피드백을 가져옵니다. (작성자 정보 포함)
  */
 export const getFeedbacks = async (
     itemId: string,
