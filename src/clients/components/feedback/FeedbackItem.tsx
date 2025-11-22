@@ -17,6 +17,8 @@ import { renderStars } from "../../utils/renderStars";
 import type { Schema } from "../../../../amplify/data/resource";
 import { updateFeedback, deleteFeedback } from "../../api/data";
 import { getCurrentUser } from "aws-amplify/auth";
+import { useAuth } from "../../context/AuthContext";
+import { formatDate } from "../../utils/format";
 
 interface FeedbackItemProps {
     feedback: Schema["Feedback"]["type"];
@@ -25,10 +27,37 @@ interface FeedbackItemProps {
 }
 
 export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackItemProps) {
+    const { user } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [editRating, setEditRating] = useState(feedback.rating);
-    const [editContent, setEditContent] = useState(feedback.content || "");
+    const [editContent, setEditContent] = useState(feedback.content ?? "");
     const [isOwner, setIsOwner] = useState(false);
+    const [authorDisplayName, setAuthorDisplayName] = useState("");
+
+    useEffect(() => {
+        if (user && feedback.owner) {
+            const ownerUsername = feedback.owner.split("::")[1];
+            setIsOwner(ownerUsername === user.username);
+        }
+    }, [user, feedback.owner]);
+
+    useEffect(() => {
+        const loadAuthor = async () => {
+            try {
+                // feedback.author()는 Promise를 반환하는 함수입니다 (Lazy Loading)
+                const author = await feedback.author();
+                let nickname = author?.data?.nickname ?? "알수없음";
+
+                if (nickname) {
+                    setAuthorDisplayName(nickname);
+                }
+            } catch (error) {
+                console.error("Failed to load author", error);
+                setAuthorDisplayName("Unknown");
+            }
+        };
+        loadAuthor();
+    }, [feedback]);
 
     useEffect(() => {
         checkOwnership();
@@ -86,6 +115,8 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
         setIsEditing(false);
     };
 
+    const showUpdatedAt = feedback.updatedAt && feedback.createdAt !== feedback.updatedAt;
+
     return (
         <ListItem
             divider
@@ -136,6 +167,7 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
             }
         >
             <ListItemText
+                disableTypography
                 primary={
                     isEditing ? (
                         <Box>
@@ -159,21 +191,45 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
                     )
                 }
                 secondary={
-                    isEditing ? (
-                        <TextField
-                            fullWidth
-                            multiline
-                            rows={2}
-                            value={editContent}
-                            onChange={(e) => setEditContent(e.target.value)}
-                            placeholder="피드백 내용을 입력하세요"
-                            variant="outlined"
-                            size="small"
-                            sx={{ mt: 1 }}
-                        />
-                    ) : (
-                        feedback.content
-                    )
+                    <Box component="div" sx={{ mt: 0.5 }}>
+                        {isEditing ? (
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={2}
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                placeholder="피드백 내용을 입력하세요"
+                                variant="outlined"
+                                size="small"
+                                sx={{ mt: 1 }}
+                            />
+                        ) : (
+                            <Typography
+                                variant="body2"
+                                color="text.primary"
+                                sx={{ whiteSpace: "pre-wrap", mb: 1 }}
+                            >
+                                {feedback.content}
+                            </Typography>
+                        )}
+
+                        {/* ✅ 메타데이터 영역 수정: 닉네임 | 날짜 */}
+                        {!isEditing && (
+                            <Stack direction="row" spacing={1} alignItems="center">
+                                <Typography variant="caption" color="text.primary" fontWeight={600}>
+                                    {authorDisplayName}
+                                </Typography>
+                                <Typography variant="caption" color="text.disabled">
+                                    |
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                    {formatDate(feedback.createdAt)}
+                                    {showUpdatedAt && " (수정됨)"}
+                                </Typography>
+                            </Stack>
+                        )}
+                    </Box>
                 }
                 slotProps={{
                     primary: { component: 'div' },
