@@ -32,7 +32,7 @@ export default function FeedbackForm({ onSubmit }: FeedbackFormProps) {
                 {/* 별점 선택 */}
                 <Box>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        영향도 평가 *
+                        유해도 평가 *
                     </Typography>
                     <Rating
                         name="rating"

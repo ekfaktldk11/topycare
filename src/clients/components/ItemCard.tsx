@@ -3,7 +3,7 @@ import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import type { Item } from "../types/index";
 import FeedbackDialog from "./feedback/FeedbackDialog";
 import { useState, useEffect } from "react";
-import { renderStars } from "../utils/renderStars";
+import { renderSeverityDots } from "../utils/renderSeverityDots";
 import { createFeedback, getAverageRating, getFeedbacks } from "../api/data";
 import type { Schema } from "../../../amplify/data/resource";
 
@@ -15,7 +15,7 @@ type ItemCardProps = {
 
 export default function ItemCard({ item, onZoom, rating = 0 }: ItemCardProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [starScore, setStarScore] = useState(Math.max(0, Math.min(5, isFinite(rating) ? rating : 0)));
+    const [severityScore, setSeverityScore] = useState(Math.max(0, Math.min(5, isFinite(rating) ? rating : 0)));
     const [feedbacks, setFeedbacks] = useState<Schema["Feedback"]["type"][]>([]);
 
     useEffect(() => {
@@ -24,7 +24,7 @@ export default function ItemCard({ item, onZoom, rating = 0 }: ItemCardProps) {
             if (errors) {
                 console.error("Error fetching average rating:", errors);
             } else if (averageRating !== null) {
-                setStarScore(Math.max(0, Math.min(5, averageRating)));
+                setSeverityScore(Math.max(0, Math.min(5, averageRating)));
             }
         };
         fetchRating();
@@ -58,7 +58,7 @@ export default function ItemCard({ item, onZoom, rating = 0 }: ItemCardProps) {
                 // Refresh rating and feedbacks
                 const { averageRating } = await getAverageRating(item.id, item.itemType);
                 if (averageRating !== null) {
-                    setStarScore(Math.max(0, Math.min(5, averageRating)));
+                    setSeverityScore(Math.max(0, Math.min(5, averageRating)));
                 }
                 const { feedbacks: feedbackList } = await getFeedbacks(item.id, item.itemType);
                 if (feedbackList) {
@@ -81,7 +81,7 @@ export default function ItemCard({ item, onZoom, rating = 0 }: ItemCardProps) {
         }
         const { averageRating } = await getAverageRating(item.id, item.itemType);
         if (averageRating !== null) {
-            setStarScore(Math.max(0, Math.min(5, averageRating)));
+            setSeverityScore(Math.max(0, Math.min(5, averageRating)));
         }
     };
 
@@ -140,12 +140,12 @@ export default function ItemCard({ item, onZoom, rating = 0 }: ItemCardProps) {
                                 <Stack gap={0.5} mt="auto">
                                     <Stack direction="row" justifyContent="space-between" alignItems="center">
                                         <Typography variant="caption" color="text.secondary">
-                                            영향도
+                                            유해도
                                         </Typography>
                                         <Stack direction="row" alignItems="center" gap={0.5}>
-                                            {renderStars(starScore)}
+                                            {renderSeverityDots(severityScore)}
                                             <Typography variant="caption" sx={{ fontVariantNumeric: "tabular-nums", ml: 0.5 }}>
-                                                {starScore.toFixed(1)} / 5
+                                                {severityScore.toFixed(1)} / 5
                                             </Typography>
                                         </Stack>
                                     </Stack>

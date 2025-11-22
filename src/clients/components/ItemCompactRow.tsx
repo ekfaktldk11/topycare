@@ -2,7 +2,7 @@ import { ListItem, ListItemButton, ListItemText, Stack, Typography } from "@mui/
 import type { Item } from "../types/index";
 import FeedbackDialog from "./feedback/FeedbackDialog";
 import { useState, useEffect } from "react";
-import { renderStars } from "../utils/renderStars";
+import { renderSeverityDots } from "../utils/renderSeverityDots";
 import { createFeedback, getAverageRating, getFeedbacks } from "../api/data";
 import type { Schema } from "../../../amplify/data/resource";
 
@@ -13,7 +13,7 @@ type ItemCompactRowProps = {
 
 export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [starScore, setStarScore] = useState(Math.max(0, Math.min(5, isFinite(rating) ? rating : 0)));
+    const [severityScore, setSeverityScore] = useState(Math.max(0, Math.min(5, isFinite(rating) ? rating : 0)));
     const [feedbacks, setFeedbacks] = useState<Schema["Feedback"]["type"][]>([]);
 
     useEffect(() => {
@@ -22,7 +22,7 @@ export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps
             if (errors) {
                 console.error("Error fetching average rating:", errors);
             } else if (averageRating !== null) {
-                setStarScore(Math.max(0, Math.min(5, averageRating)));
+                setSeverityScore(Math.max(0, Math.min(5, averageRating)));
             }
         };
         fetchRating();
@@ -56,7 +56,7 @@ export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps
                 // Refresh rating and feedbacks
                 const { averageRating } = await getAverageRating(item.id, item.itemType);
                 if (averageRating !== null) {
-                    setStarScore(Math.max(0, Math.min(5, averageRating)));
+                    setSeverityScore(Math.max(0, Math.min(5, averageRating)));
                 }
                 const { feedbacks: feedbackList } = await getFeedbacks(item.id, item.itemType);
                 if (feedbackList) {
@@ -77,7 +77,7 @@ export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps
         }
         const { averageRating } = await getAverageRating(item.id, item.itemType);
         if (averageRating !== null) {
-            setStarScore(Math.max(0, Math.min(5, averageRating)));
+            setSeverityScore(Math.max(0, Math.min(5, averageRating)));
         }
     };
 
@@ -95,9 +95,9 @@ export default function ItemCompactRow({ item, rating = 0 }: ItemCompactRowProps
                                     {item.brand}
                                 </Typography>
                                 <Stack direction="row" alignItems="center" sx={{ ml: { sm: "auto" } }}>
-                                    {renderStars(starScore)}
+                                    {renderSeverityDots(severityScore)}
                                     <Typography variant="body2" sx={{ ml: 0.5, fontVariantNumeric: "tabular-nums" }}>
-                                        {starScore.toFixed(1)} / 5
+                                        {severityScore.toFixed(1)} / 5
                                     </Typography>
                                 </Stack>
                             </Stack>

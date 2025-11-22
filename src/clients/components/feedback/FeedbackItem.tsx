@@ -13,7 +13,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
-import { renderStars } from "../../utils/renderStars";
+import { renderSeverityDots } from "../../utils/renderSeverityDots";
 import type { Schema } from "../../../../amplify/data/resource";
 import { updateFeedback, deleteFeedback } from "../../api/data";
 import { getCurrentUser } from "aws-amplify/auth";
@@ -183,7 +183,7 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
                         </Box>
                     ) : (
                         <Stack direction="row" alignItems="center" gap={0.5}>
-                            {renderStars(feedback.rating)}
+                            {renderSeverityDots(feedback.rating)}
                             <Typography variant="body1" fontWeight={600}>
                                 {feedback.rating} / 5
                             </Typography>
