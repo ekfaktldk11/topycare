@@ -131,7 +131,7 @@ export default function Navbar() {
                     href="/"
                     underline="none"
                 >
-                    topycare
+                    Topycare
                 </Link>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", marginLeft: "auto" }}>
