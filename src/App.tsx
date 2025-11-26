@@ -1,6 +1,5 @@
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import mainTheme from "./clients/mainTheme";
-import Navbar from "./clients/components/Navbar";
 import TimelineDish from "./clients/pages/TimeLineDish";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./clients/pages/LoginPage";
@@ -9,6 +8,7 @@ import { ProtectedRoute } from "./clients/components/ProtectedRoute";
 import { AdminRoute } from "./clients/components/AdminRoute";
 import ProfilePage from "./clients/pages/ProfilePage";
 import AdminPage from "./clients/pages/AdminPage";
+import Layout from "./clients/components/Layout";
 
 function App() {
     return (
@@ -16,10 +16,10 @@ function App() {
             <CssBaseline />
             <AuthProvider>
                 <Router>
-                    <Navbar />
-                    <Routes>
-                        {/* 공개 경로 */}
-                        <Route path="/" element={<TimelineDish />} />
+                    <Layout>
+                        <Routes>
+                            {/* 공개 경로 */}
+                            <Route path="/" element={<TimelineDish />} />
                         <Route path="/dish" element={<TimelineDish />} />
                         <Route path="/login" element={<LoginPage />} />
 
@@ -42,7 +42,8 @@ function App() {
                                 </AdminRoute>
                             }
                         />
-                    </Routes>
+                        </Routes>
+                    </Layout>
                 </Router>
             </AuthProvider>
         </ThemeProvider>

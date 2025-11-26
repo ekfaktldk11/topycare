@@ -77,8 +77,7 @@ export default function TimelineDish() {
     return (
         <Box sx={{ p: 2 }}>
             <ItemListView 
-                items={dishes} 
-                height={"60vh"} 
+                items={dishes}
                 initialView="detailed"
             />
         </Box>
