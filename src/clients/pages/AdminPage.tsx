@@ -1,20 +1,24 @@
 import { useState } from "react";
 import {
     Box,
-    Button,
     Card,
     CardContent,
     Container,
     Stack,
-    TextField,
     Typography,
-    Alert,
-    CircularProgress,
+    Tabs,
+    Tab,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
 import { createDish } from "../api/data";
+import { uploadImage } from "../api/storage";
+import TabPanel from "../components/admin/TabPanel";
+import DishForm from "../components/admin/DishForm";
+import ImageUploadSection from "../components/admin/ImageUploadSection";
 
 export default function AdminPage() {
+    const [tabValue, setTabValue] = useState(0);
+
+    // 상품 추가 폼 상태
     const [formData, setFormData] = useState({
         img: "",
         name: "",
@@ -24,19 +28,30 @@ export default function AdminPage() {
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleChange =
-        (field: keyof typeof formData) =>
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            setFormData({ ...formData, [field]: e.target.value });
-            // 입력 시 메시지 초기화
-            setSuccess(false);
-            setError(null);
-        };
+    // 이미지 업로드 상태
+    const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+    const [uploadLoading, setUploadLoading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
+
+    const handleTabChange = (
+        _event: React.SyntheticEvent,
+        newValue: number
+    ) => {
+        setTabValue(newValue);
+        setSuccess(false);
+        setError(null);
+        setUploadError(null);
+    };
+
+    const handleFormChange = (field: string, value: string) => {
+        setFormData({ ...formData, [field]: value });
+        setSuccess(false);
+        setError(null);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // 유효성 검사
         if (!formData.name.trim()) {
             setError("상품 이름을 입력해주세요.");
             return;
@@ -78,6 +93,60 @@ export default function AdminPage() {
         setError(null);
     };
 
+    const handleImageUpload = async (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        setUploadLoading(true);
+        setUploadError(null);
+
+        try {
+            const file = files[0];
+
+            if (file.size > 5 * 1024 * 1024) {
+                setUploadError("파일 크기는 5MB를 초과할 수 없습니다.");
+                setUploadLoading(false);
+                return;
+            }
+
+            if (!file.type.startsWith("image/")) {
+                setUploadError("이미지 파일만 업로드할 수 있습니다.");
+                setUploadLoading(false);
+                return;
+            }
+
+            const result = await uploadImage(file, "public/dishes/");
+
+            if (result.url) {
+                setUploadedImages([...uploadedImages, result.url]);
+            } else if (result.error) {
+                setUploadError(result.error);
+            }
+        } catch (err) {
+            setUploadError("이미지 업로드 중 오류가 발생했습니다.");
+            console.error("Error uploading image:", err);
+        } finally {
+            setUploadLoading(false);
+            e.target.value = "";
+        }
+    };
+
+    const handleCopyUrl = (url: string) => {
+        navigator.clipboard.writeText(url);
+        alert("URL이 클립보드에 복사되었습니다!");
+    };
+
+    const handleDeleteImage = (index: number) => {
+        setUploadedImages(uploadedImages.filter((_, i) => i !== index));
+    };
+
+    const handleUseImageUrl = (url: string) => {
+        setFormData({ ...formData, img: url });
+        setTabValue(0);
+    };
+
     return (
         <Container maxWidth="md" sx={{ py: 4 }}>
             <Stack gap={3}>
@@ -90,123 +159,46 @@ export default function AdminPage() {
                 </Typography>
 
                 <Card>
-                    <CardContent>
-                        <Typography
-                            variant="h6"
-                            sx={{ mb: 3, fontWeight: 600 }}
+                    <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                        <Tabs
+                            value={tabValue}
+                            onChange={handleTabChange}
+                            aria-label="admin tabs"
                         >
-                            새 상품 추가
-                        </Typography>
+                            <Tab label="상품 추가" />
+                            <Tab label="이미지 업로드" />
+                        </Tabs>
+                    </Box>
 
-                        <Box component="form" onSubmit={handleSubmit}>
-                            <Stack gap={2.5}>
-                                <TextField
-                                    fullWidth
-                                    label="이미지 URL"
-                                    value={formData.img}
-                                    onChange={handleChange("img")}
-                                    placeholder="https://example.com/image.jpg"
-                                    helperText="이미지 URL을 입력하세요 (선택사항)"
-                                />
+                    {/* 상품 추가 탭 */}
+                    <TabPanel value={tabValue} index={0}>
+                        <CardContent>
+                            <DishForm
+                                formData={formData}
+                                loading={loading}
+                                success={success}
+                                error={error}
+                                onFormChange={handleFormChange}
+                                onSubmit={handleSubmit}
+                                onReset={handleReset}
+                            />
+                        </CardContent>
+                    </TabPanel>
 
-                                <TextField
-                                    fullWidth
-                                    required
-                                    label="상품 이름"
-                                    value={formData.name}
-                                    onChange={handleChange("name")}
-                                    placeholder="예) 신라면"
-                                />
-
-                                <TextField
-                                    fullWidth
-                                    required
-                                    label="브랜드"
-                                    value={formData.brand}
-                                    onChange={handleChange("brand")}
-                                    placeholder="예) 농심"
-                                />
-
-                                {/* 미리보기 */}
-                                {formData.img && (
-                                    <Box>
-                                        <Typography
-                                            variant="caption"
-                                            color="text.secondary"
-                                            sx={{ mb: 1, display: "block" }}
-                                        >
-                                            이미지 미리보기
-                                        </Typography>
-                                        <Box
-                                            sx={{
-                                                width: 200,
-                                                height: 200,
-                                                borderRadius: 1,
-                                                overflow: "hidden",
-                                                bgcolor: "action.hover",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                            }}
-                                        >
-                                            <img
-                                                src={formData.img}
-                                                alt="미리보기"
-                                                style={{
-                                                    width: "100%",
-                                                    height: "100%",
-                                                    objectFit: "cover",
-                                                }}
-                                                onError={(e) => {
-                                                    const target =
-                                                        e.currentTarget as HTMLImageElement;
-                                                    target.style.display =
-                                                        "none";
-                                                }}
-                                            />
-                                        </Box>
-                                    </Box>
-                                )}
-
-                                {/* 성공/에러 메시지 */}
-                                {success && (
-                                    <Alert severity="success">
-                                        상품이 성공적으로 추가되었습니다!
-                                    </Alert>
-                                )}
-                                {error && (
-                                    <Alert severity="error">{error}</Alert>
-                                )}
-
-                                {/* 버튼 */}
-                                <Stack direction="row" gap={1.5}>
-                                    <Button
-                                        fullWidth
-                                        type="submit"
-                                        variant="contained"
-                                        color="primary"
-                                        disabled={loading}
-                                        startIcon={
-                                            loading ? (
-                                                <CircularProgress size={20} />
-                                            ) : (
-                                                <AddIcon />
-                                            )
-                                        }
-                                    >
-                                        {loading ? "추가 중..." : "상품 추가"}
-                                    </Button>
-                                    <Button
-                                        variant="outlined"
-                                        onClick={handleReset}
-                                        disabled={loading}
-                                    >
-                                        초기화
-                                    </Button>
-                                </Stack>
-                            </Stack>
-                        </Box>
-                    </CardContent>
+                    {/* 이미지 업로드 탭 */}
+                    <TabPanel value={tabValue} index={1}>
+                        <CardContent>
+                            <ImageUploadSection
+                                uploadedImages={uploadedImages}
+                                uploadLoading={uploadLoading}
+                                uploadError={uploadError}
+                                onImageUpload={handleImageUpload}
+                                onCopyUrl={handleCopyUrl}
+                                onDeleteImage={handleDeleteImage}
+                                onUseImageUrl={handleUseImageUrl}
+                            />
+                        </CardContent>
+                    </TabPanel>
                 </Card>
             </Stack>
         </Container>
