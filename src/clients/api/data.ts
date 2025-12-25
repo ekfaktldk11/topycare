@@ -464,3 +464,231 @@ export const deleteFeedback = async (
         return { deletedFeedback: null, errors: [error as any] };
     }
 };
+
+// ==================== KnowHow API ====================
+
+export type KnowHowCreateResult = {
+    newKnowHow: Schema["KnowHow"]["type"] | null;
+    errors: any[] | undefined;
+};
+
+/**
+ * 새로운 노하우를 생성합니다.
+ */
+export const createKnowHow = async (
+    title: string,
+    content: string,
+    contentType: "markdown" | "text"
+): Promise<KnowHowCreateResult> => {
+    try {
+        const profileId = await getUserProfileId();
+        
+        if (!profileId) {
+            return { newKnowHow: null, errors: [{ message: "User profile not found. Please refresh the page." }] };
+        }
+
+        const { data: newKnowHow, errors } = await client.models.KnowHow.create({
+            title,
+            content,
+            contentType,
+            userProfileId: profileId,
+        }, { authMode: "userPool" });
+
+        if (errors) {
+            console.error("Error creating know-how:", errors);
+        }
+
+        return { newKnowHow, errors };
+    } catch (error) {
+        console.error("An unexpected error occurred while creating know-how:", error);
+        return { newKnowHow: null, errors: [error as any] };
+    }
+};
+
+export type KnowHowListResult = {
+    knowHows: Schema["KnowHow"]["type"][] | null;
+    errors: any[] | null;
+};
+
+/**
+ * 모든 노하우를 가져옵니다.
+ */
+export const getKnowHows = async (): Promise<KnowHowListResult> => {
+    try {
+        const { data: knowHows, errors } = await client.models.KnowHow.list();
+
+        if (errors) {
+            console.error("Error fetching know-hows:", errors);
+            return { knowHows: null, errors };
+        }
+
+        return { knowHows: knowHows || [], errors: null };
+    } catch (error) {
+        console.error("An unexpected error occurred while fetching know-hows:", error);
+        return { knowHows: null, errors: [error as any] };
+    }
+};
+
+export type KnowHowUpdateResult = {
+    updatedKnowHow: Schema["KnowHow"]["type"] | null;
+    errors: any[] | undefined;
+};
+
+/**
+ * 노하우를 수정합니다.
+ */
+export const updateKnowHow = async (
+    knowHowId: string,
+    title: string,
+    content: string
+): Promise<KnowHowUpdateResult> => {
+    try {
+        const { data: updatedKnowHow, errors } = await client.models.KnowHow.update({
+            id: knowHowId,
+            title,
+            content,
+        }, { authMode: "userPool" });
+
+        if (errors) {
+            console.error("Error updating know-how:", errors);
+            return { updatedKnowHow: null, errors };
+        }
+
+        return { updatedKnowHow, errors };
+    } catch (error) {
+        console.error("An unexpected error occurred while updating know-how:", error);
+        return { updatedKnowHow: null, errors: [error as any] };
+    }
+};
+
+export type KnowHowUpvoteResult = {
+    upvote: Schema["KnowHowUpvote"]["type"] | null;
+    errors: any[] | undefined;
+};
+
+/**
+ * 노하우에 좋아요를 추가합니다.
+ */
+export const addKnowHowUpvote = async (
+    knowHowId: string
+): Promise<KnowHowUpvoteResult> => {
+    try {
+        const profileId = await getUserProfileId();
+        
+        if (!profileId) {
+            return { upvote: null, errors: [{ message: "User profile not found. Please refresh the page." }] };
+        }
+
+        // 이미 좋아요를 눌렀는지 확인
+        const { data: existingUpvotes } = await client.models.KnowHowUpvote.list({
+            filter: {
+                knowHowId: { eq: knowHowId },
+            },
+            authMode: "userPool",
+        });
+
+        if (existingUpvotes && existingUpvotes.length > 0) {
+            return { upvote: null, errors: [{ message: "Already upvoted" }] };
+        }
+
+        const { data: upvote, errors } = await client.models.KnowHowUpvote.create({
+            knowHowId,
+            userProfileId: profileId,
+        }, { authMode: "userPool" });
+
+        if (errors) {
+            console.error("Error adding upvote:", errors);
+        }
+
+        return { upvote, errors };
+    } catch (error) {
+        console.error("An unexpected error occurred while adding upvote:", error);
+        return { upvote: null, errors: [error as any] };
+    }
+};
+
+/**
+ * 노하우 좋아요를 취소합니다.
+ */
+export const removeKnowHowUpvote = async (
+    knowHowId: string
+): Promise<{ success: boolean; errors: any[] | undefined }> => {
+    try {
+        // 내 좋아요 찾기
+        const { data: myUpvotes } = await client.models.KnowHowUpvote.list({
+            filter: {
+                knowHowId: { eq: knowHowId },
+            },
+            authMode: "userPool",
+        });
+
+        if (!myUpvotes || myUpvotes.length === 0) {
+            return { success: false, errors: [{ message: "No upvote found" }] };
+        }
+
+        const { errors } = await client.models.KnowHowUpvote.delete({
+            id: myUpvotes[0].id,
+        }, { authMode: "userPool" });
+
+        if (errors) {
+            console.error("Error removing upvote:", errors);
+            return { success: false, errors };
+        }
+
+        return { success: true, errors: undefined };
+    } catch (error) {
+        console.error("An unexpected error occurred while removing upvote:", error);
+        return { success: false, errors: [error as any] };
+    }
+};
+
+export type KnowHowUpvoteCountResult = {
+    count: number;
+    errors: any[] | null;
+};
+
+/**
+ * 노하우의 좋아요 개수를 가져옵니다.
+ */
+export const getKnowHowUpvoteCount = async (
+    knowHowId: string
+): Promise<KnowHowUpvoteCountResult> => {
+    try {
+        const { data: upvotes, errors } = await client.models.KnowHowUpvote.list({
+            filter: {
+                knowHowId: { eq: knowHowId },
+            },
+        });
+
+        if (errors) {
+            console.error("Error fetching upvote count:", errors);
+            return { count: 0, errors };
+        }
+
+        return { count: upvotes?.length || 0, errors: null };
+    } catch (error) {
+        console.error("An unexpected error occurred while fetching upvote count:", error);
+        return { count: 0, errors: [error as any] };
+    }
+};
+
+/**
+ * 내가 해당 노하우에 좋아요를 눌렀는지 확인합니다.
+ */
+export const checkKnowHowUpvoted = async (
+    knowHowId: string
+): Promise<boolean> => {
+    try {
+        const { data: myUpvotes } = await client.models.KnowHowUpvote.list({
+            filter: {
+                knowHowId: { eq: knowHowId },
+            },
+            authMode: "userPool",
+        });
+
+        return myUpvotes !== null && myUpvotes.length > 0;
+    } catch (error) {
+        console.error("Error checking upvote status:", error);
+        return false;
+    }
+};
