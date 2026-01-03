@@ -9,6 +9,7 @@ import { AdminRoute } from "./clients/components/AdminRoute";
 import ProfilePage from "./clients/pages/ProfilePage";
 import AdminPage from "./clients/pages/AdminPage";
 import Layout from "./clients/components/Layout";
+import KnowHowPage from "./clients/pages/KnowHowPage";
 
 function App() {
     return (
@@ -22,6 +23,7 @@ function App() {
                             <Route path="/" element={<TimelineDish />} />
                         <Route path="/dish" element={<TimelineDish />} />
                         <Route path="/login" element={<LoginPage />} />
+                        <Route path="/knowhow" element={<KnowHowPage />} />
 
                         {/* 보호된 경로 */}
                         <Route
