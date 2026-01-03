@@ -42,6 +42,34 @@ const schema = a.schema({
             // owner 필드는 자동으로 추가되고 <sub>::<username> 형식으로 저장됨
             allow.owner(),
         ]), // 여기는 Model-level 의 authorization rule
+
+    KnowHow: a
+        .model({
+            title: a.string().required(),
+            content: a.string().required(),
+            contentType: a.enum(["markdown", "text"]), // 마크다운 또는 텍스트
+            userProfileId: a.id(), // Foreign Key
+            author: a.belongsTo("UserProfile", "userProfileId"),
+            upvotes: a.hasMany("KnowHowUpvote", "knowHowId"), // KnowHow : KnowHowUpvote = 1 : N 관계
+        })
+        .authorization((allow) => [
+            allow.publicApiKey().to(["read"]),
+            allow.authenticated().to(["create"]),
+            allow.owner().to(["update", "delete"]),
+        ]),
+
+    KnowHowUpvote: a
+        .model({
+            knowHowId: a.id().required(), // Foreign Key
+            knowHow: a.belongsTo("KnowHow", "knowHowId"),
+            userProfileId: a.id(), // Foreign Key
+            author: a.belongsTo("UserProfile", "userProfileId"),
+        })
+        .authorization((allow) => [
+            allow.publicApiKey().to(["read"]),
+            allow.authenticated().to(["create"]),
+            allow.owner().to(["delete"]), // 자신의 upvote만 취소 가능
+        ]),
 }); // 여기서 authorization 을 설정하는 것을 Global authorization rule 이라 함.
 
 export type Schema = ClientSchema<typeof schema>;

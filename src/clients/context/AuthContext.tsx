@@ -9,12 +9,14 @@ type AuthContextType = {
     user: AuthUser | null;
     isLoading: boolean;
     isAdmin: boolean; // isAdmin 상태 추가
+    isAuthenticated: boolean; // 인증 여부
 };
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
     isLoading: true,
     isAdmin: false, // 기본값은 false
+    isAuthenticated: false,
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -77,7 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, isAdmin }}>
+        <AuthContext.Provider value={{ user, isLoading, isAdmin, isAuthenticated: user !== null }}>
             {children}
         </AuthContext.Provider>
     );
