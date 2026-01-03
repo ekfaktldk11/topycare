@@ -6,6 +6,8 @@ const schema = a.schema({
             nickname: a.string(),
             avatarUrl: a.string(),
             feedbacks: a.hasMany("Feedback", "userProfileId"), // UserProfile : Feedback = 1 : N 관계
+            knowHows: a.hasMany("KnowHow", "userProfileId"), // UserProfile : KnowHow = 1 : N 관계
+            knowHowUpvotes: a.hasMany("KnowHowUpvote", "userProfileId"), // UserProfile : KnowHowUpvote = 1 : N 관계
         })
         .authorization((allow) => [
             allow.owner(),
