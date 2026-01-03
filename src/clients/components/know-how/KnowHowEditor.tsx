@@ -72,9 +72,7 @@ export default function KnowHowEditor({
     return (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md" fullScreen>
             <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pb: 1 }}>
-                <Typography variant="h6">
-                    {editingKnowHow ? "노하우 수정" : "새 노하우 작성"}
-                </Typography>
+                {editingKnowHow ? "노하우 수정" : "새 노하우 작성"}
                 <IconButton onClick={handleClose} size="small" aria-label="close">
                     <CloseIcon />
                 </IconButton>
