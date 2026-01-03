@@ -6,6 +6,9 @@ const schema = a.schema({
             nickname: a.string(),
             avatarUrl: a.string(),
             feedbacks: a.hasMany("Feedback", "userProfileId"), // UserProfile : Feedback = 1 : N 관계
+            knowHows: a.hasMany("KnowHow", "userProfileId"), // UserProfile : KnowHow = 1 : N 관계
+            knowHowUpvotes: a.hasMany("KnowHowUpvote", "userProfileId"), // UserProfile : KnowHowUpvote = 1 : N 관계
+            feedbackUpvotes: a.hasMany("FeedbackUpvote", "userProfileId"), // UserProfile : FeedbackUpvote = 1 : N 관계
         })
         .authorization((allow) => [
             allow.owner(),
@@ -34,6 +37,7 @@ const schema = a.schema({
             content: a.string(),
             userProfileId: a.id(), // Foreign Key
             author: a.belongsTo("UserProfile", "userProfileId"),
+            upvotes: a.hasMany("FeedbackUpvote", "feedbackId"), // Feedback : FeedbackUpvote = 1 : N 관계
         })
         .authorization((allow) => [
             allow.publicApiKey().to(["read"]),
@@ -42,6 +46,49 @@ const schema = a.schema({
             // owner 필드는 자동으로 추가되고 <sub>::<username> 형식으로 저장됨
             allow.owner(),
         ]), // 여기는 Model-level 의 authorization rule
+
+    KnowHow: a
+        .model({
+            title: a.string().required(),
+            content: a.string().required(),
+            contentType: a.enum(["markdown", "text"]),
+            userProfileId: a.id(),
+            author: a.belongsTo("UserProfile", "userProfileId"),
+            upvotes: a.hasMany("KnowHowUpvote", "knowHowId"),
+        })
+        .authorization((allow) => [
+            allow.publicApiKey().to(["read"]),
+            allow.authenticated().to(["create"]),
+            allow.owner(),
+        ]),
+
+    KnowHowUpvote: a
+        .model({
+            knowHowId: a.id().required(),
+            userProfileId: a.id().required(),
+            knowHow: a.belongsTo("KnowHow", "knowHowId"),
+            author: a.belongsTo("UserProfile", "userProfileId"),
+        })
+        .identifier(["knowHowId", "userProfileId"])
+        .authorization((allow) => [
+            allow.publicApiKey().to(["read"]),
+            allow.authenticated().to(["create"]),
+            allow.owner(),
+        ]),
+
+    FeedbackUpvote: a
+        .model({
+            feedbackId: a.id().required(),
+            userProfileId: a.id().required(),
+            feedback: a.belongsTo("Feedback", "feedbackId"),
+            author: a.belongsTo("UserProfile", "userProfileId"),
+        })
+        .identifier(["feedbackId", "userProfileId"])
+        .authorization((allow) => [
+            allow.publicApiKey().to(["read"]),
+            allow.authenticated().to(["create"]),
+            allow.owner(),
+        ]),
 }); // 여기서 authorization 을 설정하는 것을 Global authorization rule 이라 함.
 
 export type Schema = ClientSchema<typeof schema>;
