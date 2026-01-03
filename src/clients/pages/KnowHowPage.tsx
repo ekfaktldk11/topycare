@@ -31,7 +31,7 @@ import { useAuth } from "../context/AuthContext";
 import { getCurrentUser } from "aws-amplify/auth";
 
 type FilterTab = "all" | "my" | "liked";
-type SortOrder = "newest" | "oldest";
+type SortOrder = "newest" | "oldest" | "most-liked";
 
 export default function KnowHowPage() {
     const { isAuthenticated } = useAuth();
@@ -259,6 +259,12 @@ export default function KnowHowPage() {
 
         // 정렬
         filtered.sort((a, b) => {
+            if (sortOrder === "most-liked") {
+                const countA = upvoteCounts.get(a.id) || 0;
+                const countB = upvoteCounts.get(b.id) || 0;
+                return countB - countA;
+            }
+            
             const dateA = new Date(a.updatedAt || a.createdAt);
             const dateB = new Date(b.updatedAt || b.createdAt);
 
@@ -309,6 +315,7 @@ export default function KnowHowPage() {
                     <Select value={sortOrder} onChange={handleSortChange}>
                         <MenuItem value="newest">최신순</MenuItem>
                         <MenuItem value="oldest">오래된순</MenuItem>
+                        <MenuItem value="most-liked">좋아요 많은 순</MenuItem>
                     </Select>
                 </FormControl>
             </Stack>
