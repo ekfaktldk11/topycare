@@ -8,10 +8,11 @@ import { renderSeverityDots } from "../utils/renderSeverityDots";
 import { createFeedback, getAverageRating, getFeedbacks } from "../api/data";
 import type { Schema } from "../../../amplify/data/resource";
 import { getUrl } from "aws-amplify/storage";
+import { useSnackbar } from "./Snackbar";
 
 type ItemCardProps = {
     item: Item;
-    onZoom: (src: string) => void;
+    onZoom: (_src: string) => void;
     rating?: number;
 };
 
@@ -21,6 +22,7 @@ const isUrl = (str: string) => {
 };
 
 export default function ItemCard({ item, onZoom, rating = 0 }: ItemCardProps) {
+    const { showMessage } = useSnackbar();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [severityScore, setSeverityScore] = useState(Math.max(0, Math.min(5, isFinite(rating) ? rating : 0)));
     const [feedbacks, setFeedbacks] = useState<Schema["Feedback"]["type"][]>([]);
@@ -102,10 +104,13 @@ export default function ItemCard({ item, onZoom, rating = 0 }: ItemCardProps) {
                 if (averageRating !== null) {
                     setSeverityScore(Math.max(0, Math.min(5, averageRating)));
                 }
+                showMessage("피드백이 등록되었습니다.", "success");
             } else if (result.duplicated) {
+                showMessage("피드백은 한 번만 작성할 수 있습니다.\n추가할 내용은 수정 기능을 이용해 주세요.", "warning");
                 return;
             } else {
                 console.error("Failed to create feedback:", result.errors);
+                showMessage("피드백 등록에 실패했습니다.", "error");
             }
         } catch (error) {
             console.error("Error submitting feedback:", error);

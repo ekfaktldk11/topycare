@@ -58,7 +58,7 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
             try {
                 // feedback.author()는 Promise를 반환하는 함수입니다 (Lazy Loading)
                 const author = await feedback.author();
-                let nickname = author?.data?.nickname ?? "알수없음";
+                const nickname = author?.data?.nickname ?? "알수없음";
 
                 if (nickname) {
                     setAuthorDisplayName(nickname);
@@ -73,7 +73,7 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
 
     useEffect(() => {
         loadUpvoteData();
-    }, [feedback.id, user]);
+    }, [feedback.id]); // user는 loadUpvoteData 내부에서 처리
 
     const loadUpvoteData = async () => {
         try {

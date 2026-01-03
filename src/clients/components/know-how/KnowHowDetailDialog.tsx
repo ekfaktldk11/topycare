@@ -37,7 +37,7 @@ export default function KnowHowDetailDialog({
         const loadAuthor = async () => {
             try {
                 const author = await knowHow.author();
-                let nickname = author?.data?.nickname ?? "알수없음";
+                const nickname = author?.data?.nickname ?? "알수없음";
 
                 if (nickname) {
                     setAuthorDisplayName(nickname);

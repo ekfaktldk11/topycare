@@ -32,7 +32,8 @@ export default function ProfilePage() {
                 const attributes = await getUserAttributes();
                 setUserAttributes(attributes);
                 // setEditableInfo({ bio: attributes.bio || "" }); // 예시
-            } catch (err) {
+            // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+            } catch (_err) {
                 setError("사용자 정보를 불러오는 데 실패했습니다.");
             } finally {
                 setIsLoading(false);

@@ -50,7 +50,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 console.error("Failed to ensure user profile:", profileError);
             }
 
-        } catch (error) {
+            // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+        } catch (_error) {
             setUser(null);
             setIsAdmin(false);
         } finally {
@@ -85,4 +86,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
