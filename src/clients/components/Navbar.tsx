@@ -1,119 +1,24 @@
-// import { useState } from "react";
-// import type { ChangeEvent, FormEvent } from 'react';
-// import { Container, Link, Box, TextField, Button } from "@mui/material";
-
-// interface SearchBarProps {
-//     placeholder?: string;
-//     onSearch: (query: string) => void;
-// }
-
-// function SearchBarInline({ placeholder = "Search...", onSearch }: SearchBarProps) {
-//     const [query, setQuery] = useState("");
-//     const [searched, setSearched] = useState(false);
-
-//     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-//         setQuery(e.target.value);
-//     };
-
-//     const handleSubmit = (e: FormEvent) => {
-//         e.preventDefault();
-//         const trimmed = query.trim();
-//         if (trimmed) {
-//             setSearched(true);
-//             onSearch(trimmed);
-//         }
-//     };
-
-//     const clearSearch = () => {
-//         setQuery("");
-//         if (searched) setSearched(false);
-//     };
-
-//     return (
-//       <Box
-//         component="form"
-//         onSubmit={handleSubmit}
-//         sx={{ display: "flex", alignItems: "center", ml: 2 }}
-//       >
-//         {
-//           <Button
-//             onClick={clearSearch}
-//             sx={{ minWidth: 0, p: 0.5, mr: 1 }}
-//             aria-label="Clear search"
-//             disabled={query.trim().length === 0}
-//           >
-//             &#10005;
-//           </Button>
-//         }
-//         <TextField
-//           variant="outlined"
-//           value={query}
-//           onChange={handleChange}
-//           placeholder={placeholder}
-//           size="small"
-//           sx={{
-//             mr: 1,
-//             width: 180,
-//             "& .MuiInputBase-root": { height: 32 },
-//           }}
-//           autoFocus={false}
-//         />
-//         <Button
-//           type="submit"
-//           variant="contained"
-//           color="primary"
-//           sx={{ minWidth: 50 }}
-//           disabled={!query.trim()}
-//         >
-//           Search
-//         </Button>
-//       </Box>
-//     );
-// }
-
-// export default function Navbar() {
-//     return (
-//         <Container
-//             maxWidth={false}
-//             sx={{
-//                 display: "flex",
-//                 alignItems: "center",
-//                 justifyContent: "center", // 가운데 정렬
-//                 position: "sticky",
-//                 top: 0,
-//                 width: "100%",
-//                 height: "3em",
-//                 borderBottom: 1,
-//                 borderColor: "divider",
-//                 backgroundColor: "#fff",
-//                 zIndex: 1201,
-//             }}
-//         >
-//             <Box sx={{ display: "flex", alignItems: "center" }}>
-//                 <Link
-//                     className="home"
-//                     sx={{ typography: "body1", ml: 2, mr: 2, whiteSpace: "nowrap" }}
-//                     href="/"
-//                     underline="none"
-//                 >
-//                     topycare
-//                 </Link>
-//                 <SearchBarInline onSearch={query => console.log("Search query", query)} />
-//             </Box>
-//         </Container>
-//     );
-// }
-
-import { Container, Link, Box, IconButton } from "@mui/material";
-import { AccountCircle } from "@mui/icons-material";
+import { Container, Link, Box, IconButton, Tooltip } from "@mui/material";
+import { 
+    AccountCircle, 
+    Login as LoginIcon,
+    Restaurant as RestaurantIcon,
+    Lightbulb as LightbulbIcon 
+} from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
+
     return (
         <Container
             maxWidth={false}
             sx={{
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "space-between",
                 position: "sticky",
                 top: 0,
                 width: "100%",
@@ -127,17 +32,47 @@ export default function Navbar() {
             <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Link
                     className="home"
-                    sx={{ typography: "body1", ml: 2, mr: 2, whiteSpace: "nowrap" }}
-                    href="/"
+                    sx={{ 
+                        typography: "h6", 
+                        ml: 2, 
+                        mr: 2, 
+                        whiteSpace: "nowrap",
+                        cursor: "pointer",
+                        fontWeight: 600
+                    }}
+                    onClick={() => navigate("/")}
                     underline="none"
                 >
                     Topycare
                 </Link>
             </Box>
-            <Box sx={{ display: "flex", alignItems: "center", marginLeft: "auto" }}>
-                <IconButton href="/profile" color="inherit">
-                    <AccountCircle />
-                </IconButton>
+            
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mr: 2 }}>
+                <Tooltip title="음식">
+                    <IconButton onClick={() => navigate("/dish")} color="inherit">
+                        <RestaurantIcon />
+                    </IconButton>
+                </Tooltip>
+                
+                <Tooltip title="노하우">
+                    <IconButton onClick={() => navigate("/knowhow")} color="inherit">
+                        <LightbulbIcon />
+                    </IconButton>
+                </Tooltip>
+                
+                {!isAuthenticated ? (
+                    <Tooltip title="로그인">
+                        <IconButton onClick={() => navigate("/login")} color="inherit">
+                            <LoginIcon />
+                        </IconButton>
+                    </Tooltip>
+                ) : (
+                    <Tooltip title="프로필">
+                        <IconButton onClick={() => navigate("/profile")} color="inherit">
+                            <AccountCircle />
+                        </IconButton>
+                    </Tooltip>
+                )}
             </Box>
         </Container>
     );
