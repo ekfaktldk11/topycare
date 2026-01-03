@@ -11,8 +11,8 @@ const sortOptions: { value: SortOption; label: string }[] = [
     { value: "name-desc", label: "이름 (역순)" },
     { value: "created-asc", label: "생성일 (오래된순)" },
     { value: "created-desc", label: "생성일 (최신순)" },
-    { value: "rating-asc", label: "평가 적은순" },
-    { value: "rating-desc", label: "평가 많은순" },
+    { value: "rating-desc", label: "점수 (높은순)" },
+    { value: "rating-asc", label: "점수 (낮은순)" },
 ];
 
 export default function SortSelector({ value, onChange }: SortSelectorProps) {

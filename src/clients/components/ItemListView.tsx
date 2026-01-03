@@ -24,18 +24,27 @@ export default function ItemListView({ items, height = "70vh", initialView = "de
     const [sortBy, setSortBy] = React.useState<SortOption>(initialSortBy);
     const [openImg, setOpenImg] = React.useState<string | null>(null);
     const [ratings, setRatings] = React.useState<Map<string, number>>(new Map());
+    const [sortedItems, setSortedItems] = React.useState<Item[]>(items);
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
         const fetchRatings = async () => {
             setLoading(true);
-            const { ratings: ratingsMap } = await getBatchAverageRatings("dish", sortBy);
+            const { ratings: ratingsMap, sortedItems: sortedIds } = await getBatchAverageRatings("dish", sortBy);
             setRatings(ratingsMap);
+            
+            // sortedIds 순서대로 items를 정렬
+            const itemMap = new Map(items.map(item => [item.id, item]));
+            const sorted = sortedIds
+                .map(({ id }) => itemMap.get(id))
+                .filter((item): item is Item => item !== undefined);
+            
+            setSortedItems(sorted);
             setLoading(false);
         };
 
         fetchRatings();
-    }, [sortBy]);
+    }, [sortBy, items]);
 
     const handleToggle = (_: React.MouseEvent<HTMLElement>, next: ViewMode | null) => {
         if (next) setView(next);
@@ -54,7 +63,7 @@ export default function ItemListView({ items, height = "70vh", initialView = "de
             {/* 헤더 / 정렬 & 보기 토글 */}
             <Stack direction="row" alignItems="center" justifyContent="space-between" gap={2}>
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    아이템 {items.length.toLocaleString()}개
+                    아이템 {sortedItems.length.toLocaleString()}개
                 </Typography>
                 <Stack direction="row" alignItems="center" gap={1.5}>
                     <SortSelector value={sortBy} onChange={setSortBy} />
@@ -77,7 +86,7 @@ export default function ItemListView({ items, height = "70vh", initialView = "de
             <Box sx={{ overflow: "auto", height }}>
                 {view === "detailed" ? (
                     <Grid container spacing={2}>
-                        {items.map((it, idx) => (
+                        {sortedItems.map((it, idx) => (
                             <Grid key={idx} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                 <ItemCard item={it} onZoom={setOpenImg} rating={ratings.get(it.id) || 0} />
                             </Grid>
@@ -85,7 +94,7 @@ export default function ItemListView({ items, height = "70vh", initialView = "de
                     </Grid>
                 ) : (
                     <List disablePadding>
-                        {items.map((it, idx) => (
+                        {sortedItems.map((it, idx) => (
                             <ItemCompactRow key={idx} item={it} rating={ratings.get(it.id) || 0} />
                         ))}
                     </List>
