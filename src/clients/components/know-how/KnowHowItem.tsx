@@ -102,16 +102,14 @@ export default function KnowHowItem({
                                     <EditIcon />
                                 </IconButton>
                             )}
-                            {!isOwner && (
-                                <IconButton
-                                    onClick={handleUpvoteClick}
-                                    size="small"
-                                    color={isUpvoted ? "primary" : "default"}
-                                    aria-label="upvote"
-                                >
-                                    {isUpvoted ? <ThumbUpIcon /> : <ThumbUpOutlinedIcon />}
-                                </IconButton>
-                            )}
+                            <IconButton
+                                onClick={handleUpvoteClick}
+                                size="small"
+                                color={isUpvoted ? "primary" : "default"}
+                                aria-label="upvote"
+                            >
+                                {isUpvoted ? <ThumbUpIcon /> : <ThumbUpOutlinedIcon />}
+                            </IconButton>
                             <Chip label={upvoteCount} size="small" />
                         </Stack>
                     </Stack>

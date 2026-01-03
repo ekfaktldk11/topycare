@@ -465,6 +465,84 @@ export const deleteFeedback = async (
     }
 };
 
+// ============================================================
+// Feedback Upvote API
+// ============================================================
+
+export async function addFeedbackUpvote(feedbackId: string) {
+    try {
+        const profileId = await getUserProfileId();
+        if (!profileId) {
+            return { upvote: null, errors: [{ message: "User profile not found. Please refresh the page." }] };
+        }
+
+        // 복합키(get)로 "이미 눌렀는지" 확인
+        const existing = await client.models.FeedbackUpvote.get(
+            { feedbackId, userProfileId: profileId },
+            { authMode: "userPool" }
+        );
+        if (existing?.data) return { upvote: existing.data, errors: undefined };
+
+        const { data: upvote, errors } = await client.models.FeedbackUpvote.create(
+            { feedbackId, userProfileId: profileId },
+            { authMode: "userPool" }
+        );
+        return { upvote, errors };
+    } catch (error) {
+        console.error("Error adding feedback upvote:", error);
+        return { upvote: null, errors: [error as any] };
+    }
+}
+
+export async function removeFeedbackUpvote(feedbackId: string) {
+    try {
+        const profileId = await getUserProfileId();
+        if (!profileId) {
+            return { success: false, errors: [{ message: "User profile not found. Please refresh the page." }] };
+        }
+
+        const { errors } = await client.models.FeedbackUpvote.delete(
+            { feedbackId, userProfileId: profileId },
+            { authMode: "userPool" }
+        );
+        return { success: !errors, errors };
+    } catch (error) {
+        console.error("Error removing feedback upvote:", error);
+        return { success: false, errors: [error as any] };
+    }
+}
+
+export async function getFeedbackUpvoteCount(feedbackId: string) {
+    try {
+        const { data: upvotes } = await client.models.FeedbackUpvote.list({
+            filter: { feedbackId: { eq: feedbackId } },
+        });
+        return { count: upvotes?.length || 0 };
+    } catch (error) {
+        console.error("Error getting feedback upvote count:", error);
+        return { count: 0 };
+    }
+}
+
+export async function checkFeedbackUpvoted(feedbackId: string) {
+    try {
+        const profileId = await getUserProfileId();
+        if (!profileId) return false;
+
+        console.log("## checkFeedbackUpvoted feedbackId : ", feedbackId);
+        console.log("## checkFeedbackUpvoted profileId : ", profileId);
+        const res = await client.models.FeedbackUpvote.get(
+            { feedbackId, userProfileId: profileId },
+            { authMode: "userPool" }
+        );
+        console.log("## checkFeedbackUpvoted res : ", res);
+        return !!res?.data;
+    } catch (error) {
+        console.error("Error checking feedback upvote:", error);
+        return false;
+    }
+}
+
 // ==================== KnowHow API ====================
 
 export type KnowHowCreateResult = {
@@ -568,37 +646,25 @@ export type KnowHowUpvoteResult = {
 
 /**
  * 노하우에 좋아요를 추가합니다.
+ * (복합키 get으로 중복 방지, create는 유니크에 의해 2중 방어)
  */
-export const addKnowHowUpvote = async (
-    knowHowId: string
-): Promise<KnowHowUpvoteResult> => {
+export const addKnowHowUpvote = async (knowHowId: string): Promise<KnowHowUpvoteResult> => {
     try {
         const profileId = await getUserProfileId();
-        
         if (!profileId) {
             return { upvote: null, errors: [{ message: "User profile not found. Please refresh the page." }] };
         }
 
-        // 이미 좋아요를 눌렀는지 확인
-        const { data: existingUpvotes } = await client.models.KnowHowUpvote.list({
-            filter: {
-                knowHowId: { eq: knowHowId },
-            },
-            authMode: "userPool",
-        });
+        const existing = await client.models.KnowHowUpvote.get(
+            { knowHowId, userProfileId: profileId },
+            { authMode: "userPool" }
+        );
+        if (existing?.data) return { upvote: existing.data, errors: undefined };
 
-        if (existingUpvotes && existingUpvotes.length > 0) {
-            return { upvote: null, errors: [{ message: "Already upvoted" }] };
-        }
-
-        const { data: upvote, errors } = await client.models.KnowHowUpvote.create({
-            knowHowId,
-            userProfileId: profileId,
-        }, { authMode: "userPool" });
-
-        if (errors) {
-            console.error("Error adding upvote:", errors);
-        }
+        const { data: upvote, errors } = await client.models.KnowHowUpvote.create(
+            { knowHowId, userProfileId: profileId },
+            { authMode: "userPool" }
+        );
 
         return { upvote, errors };
     } catch (error) {
@@ -608,27 +674,21 @@ export const addKnowHowUpvote = async (
 };
 
 /**
- * 노하우 좋아요를 취소합니다.
+ * 노하우 좋아요를 취소합니다. (복합키로 delete)
  */
 export const removeKnowHowUpvote = async (
     knowHowId: string
 ): Promise<{ success: boolean; errors: any[] | undefined }> => {
     try {
-        // 내 좋아요 찾기
-        const { data: myUpvotes } = await client.models.KnowHowUpvote.list({
-            filter: {
-                knowHowId: { eq: knowHowId },
-            },
-            authMode: "userPool",
-        });
-
-        if (!myUpvotes || myUpvotes.length === 0) {
-            return { success: false, errors: [{ message: "No upvote found" }] };
+        const profileId = await getUserProfileId();
+        if (!profileId) {
+            return { success: false, errors: [{ message: "User profile not found. Please refresh the page." }] };
         }
 
-        const { errors } = await client.models.KnowHowUpvote.delete({
-            id: myUpvotes[0].id,
-        }, { authMode: "userPool" });
+        const { errors } = await client.models.KnowHowUpvote.delete(
+            { knowHowId, userProfileId: profileId },
+            { authMode: "userPool" }
+        );
 
         if (errors) {
             console.error("Error removing upvote:", errors);
@@ -660,6 +720,8 @@ export const getKnowHowUpvoteCount = async (
             },
         });
 
+        console.log("## upvotes : ", upvotes);
+
         if (errors) {
             console.error("Error fetching upvote count:", errors);
             return { count: 0, errors };
@@ -673,20 +735,18 @@ export const getKnowHowUpvoteCount = async (
 };
 
 /**
- * 내가 해당 노하우에 좋아요를 눌렀는지 확인합니다.
+ * 내가 해당 노하우에 좋아요를 눌렀는지 확인합니다. (복합키 get)
  */
-export const checkKnowHowUpvoted = async (
-    knowHowId: string
-): Promise<boolean> => {
+export const checkKnowHowUpvoted = async (knowHowId: string): Promise<boolean> => {
     try {
-        const { data: myUpvotes } = await client.models.KnowHowUpvote.list({
-            filter: {
-                knowHowId: { eq: knowHowId },
-            },
-            authMode: "userPool",
-        });
+        const profileId = await getUserProfileId();
+        if (!profileId) return false;
 
-        return myUpvotes !== null && myUpvotes.length > 0;
+        const res = await client.models.KnowHowUpvote.get(
+            { knowHowId, userProfileId: profileId },
+            { authMode: "userPool" }
+        );
+        return !!res?.data;
     } catch (error) {
         console.error("Error checking upvote status:", error);
         return false;

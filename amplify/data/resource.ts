@@ -8,6 +8,7 @@ const schema = a.schema({
             feedbacks: a.hasMany("Feedback", "userProfileId"), // UserProfile : Feedback = 1 : N 관계
             knowHows: a.hasMany("KnowHow", "userProfileId"), // UserProfile : KnowHow = 1 : N 관계
             knowHowUpvotes: a.hasMany("KnowHowUpvote", "userProfileId"), // UserProfile : KnowHowUpvote = 1 : N 관계
+            feedbackUpvotes: a.hasMany("FeedbackUpvote", "userProfileId"), // UserProfile : FeedbackUpvote = 1 : N 관계
         })
         .authorization((allow) => [
             allow.owner(),
@@ -36,6 +37,7 @@ const schema = a.schema({
             content: a.string(),
             userProfileId: a.id(), // Foreign Key
             author: a.belongsTo("UserProfile", "userProfileId"),
+            upvotes: a.hasMany("FeedbackUpvote", "feedbackId"), // Feedback : FeedbackUpvote = 1 : N 관계
         })
         .authorization((allow) => [
             allow.publicApiKey().to(["read"]),
@@ -64,13 +66,29 @@ const schema = a.schema({
         .model({
             knowHowId: a.id().required(), // Foreign Key
             knowHow: a.belongsTo("KnowHow", "knowHowId"),
-            userProfileId: a.id(), // Foreign Key
+            userProfileId: a.id().required(),
             author: a.belongsTo("UserProfile", "userProfileId"),
         })
+        // 유저별(=userProfileId) + 글별(=knowHowId) upvote 1번만 가능
+        .identifier(["knowHowId", "userProfileId"])
         .authorization((allow) => [
             allow.publicApiKey().to(["read"]),
             allow.authenticated().to(["create"]),
             allow.owner().to(["delete"]), // 자신의 upvote만 취소 가능
+        ]),
+
+    FeedbackUpvote: a
+        .model({
+            feedbackId: a.id().required(),
+            feedback: a.belongsTo("Feedback", "feedbackId"),
+            userProfileId: a.id().required(),
+            author: a.belongsTo("UserProfile", "userProfileId"),
+        })
+        .identifier(["feedbackId", "userProfileId"])
+        .authorization((allow) => [
+            allow.publicApiKey().to(["read"]),
+            allow.authenticated().to(["create"]),
+            allow.owner().to(["delete"]),
         ]),
 }); // 여기서 authorization 을 설정하는 것을 Global authorization rule 이라 함.
 

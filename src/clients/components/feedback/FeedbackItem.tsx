@@ -13,9 +13,18 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
 import { renderSeverityDots } from "../../utils/renderSeverityDots";
 import type { Schema } from "../../../../amplify/data/resource";
-import { updateFeedback, deleteFeedback } from "../../api/data";
+import { 
+    updateFeedback, 
+    deleteFeedback,
+    addFeedbackUpvote,
+    removeFeedbackUpvote,
+    getFeedbackUpvoteCount,
+    checkFeedbackUpvoted
+} from "../../api/data";
 import { getCurrentUser } from "aws-amplify/auth";
 import { useAuth } from "../../context/AuthContext";
 import { formatDate } from "../../utils/format";
@@ -33,6 +42,8 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
     const [editContent, setEditContent] = useState(feedback.content ?? "");
     const [isOwner, setIsOwner] = useState(false);
     const [authorDisplayName, setAuthorDisplayName] = useState("");
+    const [upvoteCount, setUpvoteCount] = useState(0);
+    const [isUpvoted, setIsUpvoted] = useState(false);
 
     useEffect(() => {
         if (user && feedback.owner) {
@@ -69,6 +80,24 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
             setIsOwner(feedback.owner === user.username);
         } catch (error) {
             console.error("Error checking ownership:", error);
+        }
+    };
+
+    useEffect(() => {
+        loadUpvoteData();
+    }, [feedback.id, user]);
+
+    const loadUpvoteData = async () => {
+        try {
+            const { count } = await getFeedbackUpvoteCount(feedback.id);
+            setUpvoteCount(count);
+
+            if (user) {
+                const upvoted = await checkFeedbackUpvoted(feedback.id);
+                setIsUpvoted(upvoted);
+            }
+        } catch (error) {
+            console.error("Error loading upvote data:", error);
         }
     };
 
@@ -113,6 +142,31 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
         setEditRating(feedback.rating);
         setEditContent(feedback.content || "");
         setIsEditing(false);
+    };
+
+    const handleUpvoteToggle = async () => {
+        if (!user) {
+            alert("좋아요를 누르려면 로그인이 필요합니다.");
+            return;
+        }
+
+        try {
+            if (isUpvoted) {
+                const result = await removeFeedbackUpvote(feedback.id);
+                if (result.success) {
+                    setIsUpvoted(false);
+                    setUpvoteCount(prev => prev - 1);
+                }
+            } else {
+                const result = await addFeedbackUpvote(feedback.id);
+                if (result.upvote) {
+                    setIsUpvoted(true);
+                    setUpvoteCount(prev => prev + 1);
+                }
+            }
+        } catch (error) {
+            console.error("Error toggling upvote:", error);
+        }
     };
 
     const showUpdatedAt = feedback.updatedAt && feedback.createdAt !== feedback.updatedAt;
@@ -214,7 +268,7 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
                             </Typography>
                         )}
 
-                        {/* ✅ 메타데이터 영역 수정: 닉네임 | 날짜 */}
+                        {/* ✅ 메타데이터 영역 수정: 닉네임 | 날짜 | 좋아요 */}
                         {!isEditing && (
                             <Stack direction="row" spacing={1} alignItems="center">
                                 <Typography variant="caption" color="text.primary" fontWeight={600}>
@@ -227,6 +281,26 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
                                     {formatDate(feedback.createdAt)}
                                     {showUpdatedAt && " (수정됨)"}
                                 </Typography>
+                                <Typography variant="caption" color="text.disabled">
+                                    |
+                                </Typography>
+                                <Stack direction="row" alignItems="center" spacing={0.5}>
+                                    <IconButton
+                                        size="small"
+                                        onClick={handleUpvoteToggle}
+                                        color={isUpvoted ? "primary" : "default"}
+                                        sx={{ padding: 0.5 }}
+                                    >
+                                        {isUpvoted ? (
+                                            <ThumbUpIcon fontSize="small" />
+                                        ) : (
+                                            <ThumbUpOutlinedIcon fontSize="small" />
+                                        )}
+                                    </IconButton>
+                                    <Typography variant="caption" color="text.secondary">
+                                        {upvoteCount}
+                                    </Typography>
+                                </Stack>
                             </Stack>
                         )}
                     </Box>
