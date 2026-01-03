@@ -10,15 +10,17 @@ import ProfilePage from "./clients/pages/ProfilePage";
 import AdminPage from "./clients/pages/AdminPage";
 import Layout from "./clients/components/Layout";
 import KnowHowPage from "./clients/pages/KnowHowPage";
+import { SnackbarProvider } from "./clients/components/Snackbar";
 
 function App() {
     return (
         <ThemeProvider theme={mainTheme}>
             <CssBaseline />
-            <AuthProvider>
-                <Router>
-                    <Layout>
-                        <Routes>
+            <SnackbarProvider>
+                <AuthProvider>
+                    <Router>
+                        <Layout>
+                            <Routes>
                             {/* 공개 경로 */}
                             <Route path="/" element={<TimelineDish />} />
                         <Route path="/dish" element={<TimelineDish />} />
@@ -48,6 +50,7 @@ function App() {
                     </Layout>
                 </Router>
             </AuthProvider>
+            </SnackbarProvider>
         </ThemeProvider>
     );
 }

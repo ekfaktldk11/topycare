@@ -29,12 +29,14 @@ import {
 import type { Schema } from "../../../amplify/data/resource";
 import { useAuth } from "../context/AuthContext";
 import { getCurrentUser } from "aws-amplify/auth";
+import { useSnackbar } from "../components/Snackbar";
 
 type FilterTab = "all" | "my" | "liked";
 type SortOrder = "newest" | "oldest" | "most-liked";
 
 export default function KnowHowPage() {
     const { isAuthenticated } = useAuth();
+    const { showMessage } = useSnackbar();
     const [knowHows, setKnowHows] = useState<Schema["KnowHow"]["type"][]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -128,7 +130,7 @@ export default function KnowHowPage() {
         contentType: "markdown" | "text";
     }) => {
         if (!isAuthenticated) {
-            alert("로그인이 필요합니다.");
+            showMessage("로그인이 필요합니다.", "warning");
             return;
         }
 
@@ -141,14 +143,14 @@ export default function KnowHowPage() {
 
             if (errors) {
                 console.error("Error creating know-how:", errors);
-                alert("노하우 작성에 실패했습니다.");
+                showMessage("노하우 작성에 실패했습니다.", "error");
             } else if (newKnowHow) {
                 await loadKnowHows();
                 setEditorOpen(false);
             }
         } catch (error) {
             console.error("Unexpected error creating know-how:", error);
-            alert("예상치 못한 오류가 발생했습니다.");
+            showMessage("예상치 못한 오류가 발생했습니다.", "error");
         }
     };
 
@@ -168,7 +170,7 @@ export default function KnowHowPage() {
 
             if (errors) {
                 console.error("Error updating know-how:", errors);
-                alert("노하우 수정에 실패했습니다.");
+                showMessage("노하우 수정에 실패했습니다.", "error");
             } else if (updatedKnowHow) {
                 await loadKnowHows();
                 setEditorOpen(false);
@@ -176,13 +178,13 @@ export default function KnowHowPage() {
             }
         } catch (error) {
             console.error("Unexpected error updating know-how:", error);
-            alert("예상치 못한 오류가 발생했습니다.");
+            showMessage("예상치 못한 오류가 발생했습니다.", "error");
         }
     };
 
     const handleUpvoteToggle = async (knowHowId: string) => {
         if (!isAuthenticated) {
-            alert("로그인이 필요합니다.");
+            showMessage("로그인이 필요합니다.", "warning");
             return;
         }
 

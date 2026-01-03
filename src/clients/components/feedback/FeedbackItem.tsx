@@ -27,6 +27,7 @@ import {
 } from "../../api/data";
 import { useAuth } from "../../context/AuthContext";
 import { formatDate } from "../../utils/format";
+import { useSnackbar } from "../Snackbar";
 
 interface FeedbackItemProps {
     feedback: Schema["Feedback"]["type"];
@@ -36,6 +37,7 @@ interface FeedbackItemProps {
 
 export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackItemProps) {
     const { user } = useAuth();
+    const { showMessage } = useSnackbar();
     const [isEditing, setIsEditing] = useState(false);
     const [editRating, setEditRating] = useState(feedback.rating);
     const [editContent, setEditContent] = useState(feedback.content ?? "");
@@ -132,7 +134,7 @@ export default function FeedbackItem({ feedback, onUpdate, onDelete }: FeedbackI
 
     const handleUpvoteToggle = async () => {
         if (!user) {
-            alert("좋아요를 누르려면 로그인이 필요합니다.");
+            showMessage("좋아요를 누르려면 로그인이 필요합니다.", "warning");
             return;
         }
 

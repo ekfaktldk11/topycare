@@ -14,8 +14,10 @@ import { uploadImage } from "../api/storage";
 import TabPanel from "../components/admin/TabPanel";
 import DishForm from "../components/admin/DishForm";
 import ImageUploadSection from "../components/admin/ImageUploadSection";
+import { useSnackbar } from "../components/Snackbar";
 
 export default function AdminPage() {
+    const { showMessage } = useSnackbar();
     const [tabValue, setTabValue] = useState(0);
 
     // 상품 추가 폼 상태
@@ -135,7 +137,7 @@ export default function AdminPage() {
 
     const handleCopyUrl = (url: string) => {
         navigator.clipboard.writeText(url);
-        alert("URL이 클립보드에 복사되었습니다!");
+        showMessage("URL이 클립보드에 복사되었습니다!", "success");
     };
 
     const handleDeleteImage = (index: number) => {

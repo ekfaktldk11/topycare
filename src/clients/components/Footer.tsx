@@ -1,10 +1,13 @@
 import { Box, Container, Typography, Link } from "@mui/material";
 import { Pets, ContentCopy } from "@mui/icons-material";
+import { useSnackbar } from "./Snackbar";
 
 export default function Footer() {
+    const { showMessage } = useSnackbar();
+    
     const handleCopyAccount = () => {
         navigator.clipboard.writeText("3333-30-9649007");
-        alert("계좌번호가 복사되었습니다!\n3333-30-9649007");
+        showMessage("계좌번호가 복사되었습니다!\n3333-30-9649007", "success");
     };
 
     return (
