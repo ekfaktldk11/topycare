@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { signIn, signOut, signUp, confirmSignUp } from "aws-amplify/auth";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 // ...existing code...
 export default function LoginPage(): JSX.Element {

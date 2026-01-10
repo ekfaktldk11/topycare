@@ -1,7 +1,7 @@
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import mainTheme from "./clients/mainTheme";
 import TimelineDish from "./clients/pages/TimeLineDish";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router";
 import LoginPage from "./clients/pages/LoginPage";
 import { AuthProvider } from "./clients/context/AuthContext";
 import { ProtectedRoute } from "./clients/components/ProtectedRoute";

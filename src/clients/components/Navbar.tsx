@@ -5,7 +5,7 @@ import {
     Restaurant as RestaurantIcon,
     Lightbulb as LightbulbIcon 
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
